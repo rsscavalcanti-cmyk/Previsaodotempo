@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Chuva Agora — Zona Norte RJ (NASA GIBS + Open‑Meteo + Uber‑GPS)</title>
+  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), previsão Open‑Meteo, alertas e GPS ao estilo Uber (ponto pulsante + círculo de precisão)." />
+  <meta name="theme-color" content="#0b2a4a" />
+  <style>
+    :root{
+      --bg:#0b1220; --ink:#e5ecf5; --muted:#9fb3c8; --card:#0f172a; --head:#111827;
+      --accent:#38bdf8; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --hair:#ffffff22;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0}
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans';
+         color:var(--ink); background:var(--bg)}
+    .app{display:grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; min-height:100vh}
+    header{padding:10px 12px; background:var(--head); border-bottom:1px solid var(--hair); display:flex; flex-wrap: wrap; gap:10px; align-items:center; justify-content:space-between}
+    header .title{display:flex; gap:10px; align-items:center}
+    header h1{font-size:16px; margin:0; font-weight:700}
+    header .sub{font-size:12px; color:var(--muted)}
+    .map-wrap{position:relative; height:56vh}
+    #map{position:absolute; inset:0}
+    .panel{display:grid; gap:10px; padding:10px; background:linear-gradient(180deg, #0f172a, #0b1220)}
+    .cards{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px}
+    @media (min-width:980px){
+      .app{grid-template-columns: 1.3fr 1fr; grid-template-rows: auto 1fr}
+      .map-wrap{grid-column:1/2; grid-row:2/3; height:auto}
+      .panel{grid-column:2/3; grid-row:2/3; overflow:auto; max-height: calc(100vh - 64px)}
+      header{grid-column:1/-1}
+    }
+    .card{background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:10px}
+    .card h3{margin:0 0 6px 0; font-size:14px}
+    .kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:8px}
+    .kpi{background:#0b1328; border:1px solid var(--hair); border-radius:12px; padding:8px}
+    .kpi .v{font-size:18px; font-weight:700}
+    .kpi .l{font-size:11px; color:var(--muted)}
+    .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    button, select, input[type="datetime-local"]{
+      background:#0b1328; color:var(--ink); border:1px solid var(--hair); border-radius:10px; padding:8px 10px; font-size:13px
+    }
+    button:hover{outline:1px solid var(--accent)}
+    .small{font-size:12px; color:var(--muted)}
+    footer{padding:8px 12px; border-top:1px solid var(--hair); background:#0b1220; font-size:12px; color:var(--muted)}
+    a{color:var(--accent)}
+    button.on{outline:1px solid var(--accent); border-color: var(--accent)}
+    #gpsStatus{margin-left:6px}
+
+    /* === Uber-like blue dot (pulsing) === */
+    .uber-dot{position:relative; width:16px; height:16px;}
+    .uber-dot .core{position:absolute; inset:0; border-radius:50%; background:#3b82f6; box-shadow:0 0 0 2px #fff;}
+    .uber-dot .pulse{position:absolute; inset:-6px; border-radius:50%; border:2px solid #60a5fa; opacity:0; animation:pulse 2s ease-out infinite}
+    @keyframes pulse{ 0%{transform:scale(0.6); opacity:0.6} 70%{transform:scale(1.6); opacity:0} 100%{transform:scale(1.8); opacity:0} }
+
+    /* Alert styles */
+    .alert{padding:6px 8px; border-radius:6px; font-size:13px; transition:all 0.3s ease}
+    .alert.ok{background:rgba(22, 163, 74, 0.2); border-left:3px solid var(--ok)}
+    .alert.bad{background:rgba(239, 68, 68, 0.2); border-left:3px solid var(--bad)}
+    
+    /* Loading indicator */
+    .loading{display:inline-block; width:16px; height:16px; border:2px solid transparent; border-top:2px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+    /* Responsive improvements */
+    @media (max-width:768px){
+      .cards{grid-template-columns: 1fr}
+      .toolbar{flex-direction:column; align-items:stretch}
+      .toolbar > *{flex:1}
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="title">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/><path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <div>
+          <h1>Chuva Agora — Zona Norte RJ</h1>
+          <div class="sub">NASA GIBS / IMERG + Previsão Open‑Meteo • GPS estilo Uber</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button id="btnHere">Minha localização (1x)</button>
+        <button id="btnFollow">Seguir minha posição: OFF</button>
+        <span id="gpsStatus" class="small"></span>
+        <button id="btnZN">Ir p/ Zona Norte RJ</button>
+        <label class="small">Imagem IMERG (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
+        <button id="btnNow">Agora</button>
+        <select id="opacitySel" title="Opacidade do IMERG">
+          <option value="0.6">IMERG 60%</option>
+          <option value="0.8">IMERG 80%</option>
+          <option value="1">IMERG 100%</option>
+          <option value="0.4">IMERG 40%</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="map-wrap">
+      <div id="map"></div>
+    </div>
+
+    <section class="panel">
+      <div class="cards">
+        <div class="card" id="alertBox">
+          <h3>Alerta rápido (próx. 3h)</h3>
+          <div class="alert" id="alertMsg">Carregando...</div>
+        </div>
+        <div class="card">
+          <h3>Parâmetros de chuva (agora)</h3>
+          <div class="kpis">
+            <div class="kpi"><div class="v" id="kProb">–%</div><div class="l">Prob. de chuva</div></div>
+            <div class="kpi"><div class="v" id="kRain">– mm</div><div class="l">Chuva (1h)</div></div>
+            <div class="kpi"><div class="v" id="kSum">– mm</div><div class="l">Acumulado hoje</div></div>
+          </div>
+          <div class="small" style="margin-top:6px">Fonte: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open‑Meteo</a></div>
+        </div>
+        <div class="card" style="grid-column:1/-1">
+          <h3>Próximas 48h — chuva (mm) e probabilidade (%)</h3>
+          <canvas id="chart" height="120"></canvas>
+        </div>
+      </div>
+      <div class="small">Camada satélite: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> — IMERG Precipitation Rate (30 min). Mapa base: © OpenStreetMap.</div>
+      <details class="small" open>
+        <summary>Dev • Testes rápidos</summary>
+        <ul id="testResults"></ul>
+      </details>
+    </section>
+
+    <footer>
+      Dica: deixe o "Seguir minha posição" ligado para ficar exatamente como na Uber (ponto azul pulsante + círculo de precisão).
+    </footer>
+  </div>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    // ===== Utils =====
+    const $ = (id) => document.getElementById(id);
+    const btnHere = $('btnHere');
+    const btnFollow = $('btnFollow');
+    const gpsStatus = $('gpsStatus');
+    const btnZN = $('btnZN');
+    const timeInput = $('timeIso');
+    const btnNow = $('btnNow');
+    const opacitySel = $('opacitySel');
+    const alertMsg = $('alertMsg');
+
+    // ===== Config =====
+    const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
+    let current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
+
+    // ===== Map (Leaflet) =====
+    const map = L.map('map', { 
+      zoomControl: true, 
+      worldCopyJump: true,
+      preferCanvas: true
+    }).setView([current.lat, current.lon], ZONA_NORTE.zoom);
+    
+    // Adicionar camada base do OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+      maxZoom: 19, 
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // NASA GIBS IMERG
+    const gibsBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
+    const gibsLayer = 'GPM_3IMERGHH_06_precipitationCal';
+    const gibsTms = 'GoogleMapsCompatible_Level9';
+    const gibsUrl = (iso) => `${gibsBase}/${gibsLayer}/default/${iso}/${gibsTms}/{z}/{y}/{x}.png`;
+
+    const roundTo30UTC = (d) => { 
+      const x = new Date(d); 
+      x.setUTCMinutes(x.getUTCMinutes() - (x.getUTCMinutes() % 30), 0, 0); 
+      return x; 
+    };
+    
+    const toIsoZ = (d) => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+    let timeNowUTC = roundTo30UTC(new Date());
+    const setTimeInput = (d) => { 
+      // Converter UTC para horário local sem alterar o tempo real
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      timeInput.value = local.toISOString().slice(0, 16); 
+    };
+    setTimeInput(timeNowUTC);
+
+    let imergLayer = null;
+    
+    function refreshIMERG() {
+      if (!timeInput.value) return;
+      
+      const localDate = new Date(timeInput.value);
+      // Converter para UTC (adicionando o offset do fuso horário)
+      const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+      const roundedDate = roundTo30UTC(utcDate);
+      const isoZ = toIsoZ(roundedDate);
+      
+      // Remover camada anterior se existir
+      if (imergLayer) {
+        map.removeLayer(imergLayer);
+      }
+      
+      // Criar nova camada
+      imergLayer = L.tileLayer(gibsUrl(isoZ), { 
+        tileSize: 256, 
+        opacity: parseFloat(opacitySel.value || '0.6'), 
+        attribution: 'NASA GIBS / IMERG',
+        minZoom: 1,
+        maxZoom: 9,
+        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+      });
+      
+      imergLayer.addTo(map);
+    }
+
+    // Inicializar a camada IMERG
+    refreshIMERG();
+    
+    // Event listeners
+    opacitySel.addEventListener('change', () => {
+      if (imergLayer) {
+        imergLayer.setOpacity(parseFloat(opacitySel.value));
+      }
+    });
+    
+    btnNow.addEventListener('click', () => { 
+      timeNowUTC = roundTo30UTC(new Date()); 
+      setTimeInput(timeNowUTC); 
+      refreshIMERG(); 
+    });
+    
+    timeInput.addEventListener('change', refreshIMERG);
+
+    // ===== Uber-style GPS marker =====
+    const dotHTML = '<div class="uber-dot"><div class="core"></div><div class="pulse"></div></div>';
+    const dotIcon = L.divIcon({ 
+      html: dotHTML, 
+      className: '', 
+      iconSize: [16, 16], 
+      iconAnchor: [8, 8] 
+    });
+    
+    const gpsMarker = L.marker([current.lat, current.lon], { 
+      icon: dotIcon, 
+      interactive: false,
+      zIndexOffset: 1000
+    }).addTo(map);
+    
+    const accCircle = L.circle([current.lat, current.lon], { 
+      radius: 40, 
+      color: '#60a5fa', 
+      weight: 1, 
+      fill: true, 
+      fillOpacity: 0.1,
+      fillColor: '#3b82f6'
+    }).addTo(map);
+
+    function moveGPS(lat, lon, acc) {
+      current = { lat, lon };
+      gpsMarker.setLatLng([lat, lon]);
+      accCircle.setLatLng([lat, lon]);
+      if (typeof acc === 'number' && isFinite(acc)) {
+        accCircle.setRadius(Math.max(10, acc));
+      }
+    }
+
+    // ===== Forecast (Open‑Meteo) =====
+    let chart = null;
+    
+    async function loadForecast() {
+      try {
+        alertMsg.textContent = 'Carregando...';
+        alertMsg.classList.remove('ok', 'bad');
+        
+        const url = new URL('https://api.open-meteo.com/v1/forecast');
+        url.search = new URLSearchParams({ 
+          latitude: current.lat, 
+          longitude: current.lon, 
+          hourly: 'precipitation,precipitation_probability,rain,showers', 
+          daily: 'precipitation_sum,precipitation_hours', 
+          timezone: 'America/Sao_Paulo',
+          forecast_days: 3
+        }).toString();
+        
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        
+        const data = await res.json(); 
+        if (!data?.hourly) throw new Error('Dados inválidos da API');
+        
+        const H = data.hourly;
+        const now = new Date();
+        const timezoneOffset = now.getTimezoneOffset() * 60000;
+        const localTime = new Date(now.getTime() - timezoneOffset);
+        
+        // Encontrar índice da hora atual
+        let nowIdx = 0;
+        for (let i = 0; i < H.time.length; i++) {
+          const hourTime = new Date(H.time[i]);
+          if (hourTime >= localTime) {
+            nowIdx = i;
+            break;
+          }
+        }
+        
+        const prob = H.precipitation_probability?.[nowIdx] ?? 0;
+        const rain = (H.rain?.[nowIdx] ?? 0) + (H.showers?.[nowIdx] ?? 0);
+        const todaySum = data.daily?.precipitation_sum?.[0] ?? null;
+        
+        $('kProb').textContent = prob + '%';
+        $('kRain').textContent = rain.toFixed(1) + ' mm';
+        $('kSum').textContent = (todaySum != null ? todaySum.toFixed(1) : '–') + ' mm';
+        
+        // Calcular alerta para próximas 3 horas
+        let maxProb = 0, sumRain = 0;
+        for (let i = nowIdx; i < nowIdx + 3 && i < H.precipitation_probability.length; i++) {
+          maxProb = Math.max(maxProb, H.precipitation_probability?.[i] ?? 0);
+          sumRain += (H.rain?.[i] ?? 0) + (H.showers?.[i] ?? 0);
+        }
+        
+        let alertText = '';
+        if (maxProb >= 80 && sumRain >= 10) {
+          alertMsg.classList.add('bad');
+          alertText = `Chuva forte provável nas próximas 3h (prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm).`;
+        } else if (maxProb >= 60 && sumRain >= 3) {
+          alertText = `Chuva moderada possível nas próximas 3h (prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm).`;
+        } else if (maxProb >= 30) {
+          alertMsg.classList.add('ok');
+          alertText = `Possibilidade de chuva fraca (prob. ${maxProb}%).`;
+        } else {
+          alertMsg.classList.add('ok');
+          alertText = 'Sem sinal relevante de chuva nas próximas horas.';
+        }
+        alertMsg.textContent = alertText;
+        
+        // Gráfico para próximas 48 horas
+        const endIdx = Math.min(nowIdx + 48, H.time.length);
+        const labels = H.time.slice(nowIdx, endIdx).map(t => {
+          const date = new Date(t);
+          return date.toLocaleString('pt-BR', { 
+            hour: '2-digit', 
+            day: '2-digit', 
+            month: '2-digit' 
+          });
+        });
+        
+        const mm = H.precipitation.slice(nowIdx, endIdx);
+        const prob48 = H.precipitation_probability.slice(nowIdx, endIdx);
+        
+        const ctx = document.getElementById('chart').getContext('2d');
+        if (chart) chart.destroy();
+        
+        chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [
+              {
+                type: 'bar',
+                label: 'Chuva (mm)',
+                data: mm,
+                yAxisID: 'y',
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+              },
+              {
+                type: 'line',
+                label: 'Probabilidade (%)',
+                data: prob48,
+                yAxisID: 'y1',
+                borderColor: 'rgba(239, 68, 68, 1)',
+                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderWidth: 2,
+                pointRadius: 2,
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+              y: {
+                beginAtZero: true,
+                position: 'left',
+                title: { display: true, text: 'mm' },
+                grid: { color: 'rgba(255, 255, 255, 0.1)' }
+              },
+              y1: {
+                beginAtZero: true,
+                position: 'right',
+                grid: { drawOnChartArea: false },
+                title: { display: true, text: '%' },
+                suggestedMax: 100,
+                ticks: { color: 'rgba(239, 68, 68, 1)' }
+              },
+              x: {
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { maxTicksLimit: 12 }
+            }
+            },
+            plugins: {
+              legend: { display: true, labels: { color: '#e5ecf5' } },
+              tooltip: { mode: 'index', intersect: false }
+            }
+          }
+        });
+        
+      } catch (e) {
+        console.warn('Forecast error', e);
+        alertMsg.textContent = 'Erro ao carregar previsão';
+        alertMsg.classList.remove('ok', 'bad');
+        
+        $('kProb').textContent = '–%';
+        $('kRain').textContent = '– mm';
+        $('kSum').textContent = '– mm';
+      }
+    }
+
+    // ===== Controls =====
+    btnZN.addEventListener('click', () => {
+      map.setView([ZONA_NORTE.lat, ZONA_NORTE.lon], ZONA_NORTE.zoom);
+      current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
+      moveGPS(current.lat, current.lon, 40);
+      loadForecast();
+    });
+    
+    btnHere.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada.');
+        return;
+      }
+      
+      navigator.geolocation.getCurrentPosition(
+        p => {
+          const { latitude, longitude, accuracy } = p.coords;
+          moveGPS(latitude, longitude, accuracy);
+          map.setView([latitude, longitude], 15);
+          loadForecast();
+        },
+        () => {
+          alert('Não foi possível obter sua localização.');
+          gpsStatus.textContent = 'Erro ao obter localização';
+        }
+      );
+    });
+
+    let following = false;
+    let watchId = null;
+    let lastUpdate = 0;
+    
+    function startFollow() {
+      if (!navigator.geolocation) {
+        alert('Geolocalização não suportada.');
+        return;
+      }
+      
+      if (watchId !== null) return;
+      
+      following = true;
+      btnFollow.textContent = 'Seguir minha posição: ON';
+      btnFollow.classList.add('on');
+      gpsStatus.textContent = 'Ativo';
+      
+      watchId = navigator.geolocation.watchPosition(
+        p => {
+          const { latitude, longitude, accuracy } = p.coords;
+          moveGPS(latitude, longitude, accuracy);
+          
+          const now = Date.now();
+          if (now - lastUpdate > 1000) {
+            map.setView([latitude, longitude], Math.max(map.getZoom(), 15), { animate: false });
+            lastUpdate = now;
+          }
+          
+          loadForecast();
+        },
+        e => {
+          gpsStatus.textContent = 'GPS indisponível';
+          console.warn('GPS error:', e);
+        },
+        { enableHighAccuracy: true, maximumAge: 8000, timeout: 15000 }
+      );
+    }
+    
+    function stopFollow() {
+      following = false;
+      btnFollow.textContent = 'Seguir minha posição: OFF';
+      btnFollow.classList.remove('on');
+      gpsStatus.textContent = '';
+      
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+      }
+    }
+    
+    btnFollow.addEventListener('click', () => {
+      following ? stopFollow() : startFollow();
+    });
+
+    // Inicializar previsão
+    loadForecast();
+
+    // ===== Tests =====
+    const tests = [];
+    const pass = (n) => tests.push(['✅', n]);
+    const fail = (n, e) => tests.push(['❌', n + ' — ' + (e?.message || e)]);
+    
+    try {
+      if (btnHere && btnFollow && btnZN && timeInput && btnNow && opacitySel) {
+        pass('DOM montado');
+      } else {
+        throw new Error('Algum controle ausente');
+      }
+    } catch (e) {
+      fail('DOM montado', e);
+    }
+    
+    try {
+      const testDate = new Date('2025-09-27T00:00:00Z');
+      const rounded = roundTo30UTC(testDate);
+      if (rounded.getUTCMinutes() === 0) pass('Arredondamento de data UTC');
+      else throw new Error('Arredondamento incorreto');
+    } catch (e) {
+      fail('Arredondamento de data UTC', e);
+    }
+    
+    try {
+      const url = gibsUrl('2025-09-27T00:00:00Z');
+      if (url.includes('GPM_3IMERGHH_06')) pass('GIBS URL');
+      else throw new Error('Camada errada');
+    } catch (e) {
+      fail('GIBS URL', e);
+    }
+    
+    try {
+      // Simular atualização GPS
+      moveGPS(-22.90, -43.25, 25);
+      const r = accCircle.getRadius();
+      if (r >= 10) pass('GPS: círculo de precisão atualiza');
+      else throw new Error('Raio não atualizado');
+    } catch (e) {
+      fail('GPS: círculo de precisão atualiza', e);
+    }
+    
+    const ul = $('testResults');
+    if (ul) {
+      tests.forEach(t => {
+        const li = document.createElement('li');
+        li.textContent = t[0] + ' ' + t[1];
+        ul.appendChild(li);
+      });
+    }
+  });
+</script>
+</body>
+</html>
