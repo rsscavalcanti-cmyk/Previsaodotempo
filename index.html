@@ -114,15 +114,11 @@
 
     .chart-container { position:relative; height:320px; width:100% }
     .chart-note { margin-top:8px; font-size:12px; color:var(--muted); text-align:center }
-
-    footer { 
-      margin-top:20px; padding:12px; border:1px solid var(--hair); border-radius:14px; 
-      background:rgba(255,255,255,.92); text-align:center; color:var(--muted); font-size:12px 
-    }
     
     .data-source { 
-      text-align:center; font-size:12px; color:var(--muted); 
-      margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--hair);
+      text-align:center; font-size:10px; color:var(--muted); 
+      margin-top: 5px; padding-top: 5px; border-top: 1px solid var(--hair);
+      opacity: 0.7;
     }
     
     .extremes-info {
@@ -130,6 +126,31 @@
       border-radius: 10px;
       padding: 12px;
       margin-top: 10px;
+      font-size: 14px;
+    }
+    
+    .extremes-info div {
+      margin-bottom: 5px;
+    }
+    
+    .no-data-message {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .info-box {
+      background: rgba(240, 248, 255, 0.7);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
     }
 
     @media(max-width:480px){ 
@@ -139,6 +160,7 @@
       .temp{font-size:28px} 
       .current-conditions { flex-direction: column; text-align: center; gap: 8px; }
       .chart-container { height: 250px; }
+      .extremes-info { font-size: 12px; }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -194,25 +216,33 @@
         <div class="card">
           <h3>📊 Chuva — 15 dias</h3>
           <div class="chart-container"><canvas id="chartRain"></canvas></div>
-          <div class="chart-note">Colunas: <strong>mm/dia</strong> • Linha: <strong>% diário máx.</strong> • Total 15 dias: <strong id="sum15">-- mm</strong></div>
+          <div class="chart-note">Colunas: <strong>mm/dia</strong> • Linha: <strong>% diário máx.</strong> • Total 15 dias: <strong id="sum15">-- mm</strong>
+            <div class="data-source">Dados: Open-Meteo</div>
+          </div>
         </div>
 
         <div class="card">
           <h3>🌡️ Temperatura — 15 dias (mín/máx)</h3>
           <div class="chart-container"><canvas id="chartTemp"></canvas></div>
-          <div class="chart-note">Linhas: <strong>°C</strong> (mínima e máxima diárias). <span id="tempSummary">Analisando extremos…</span></div>
+          <div class="chart-note">Linhas: <strong>°C</strong> (mínima e máxima diárias). <span id="tempSummary">Analisando extremos…</span>
+            <div class="data-source">Dados: Open-Meteo</div>
+          </div>
         </div>
 
         <div class="card">
           <h3>🤗 Sensação Térmica — 15 dias (mín/máx)</h3>
           <div class="chart-container"><canvas id="chartFeel"></canvas></div>
-          <div class="chart-note">Linhas: <strong>°C</strong> (mín/máx aparentes). <span id="feelSummary">Analisando…</span></div>
+          <div class="chart-note">Linhas: <strong>°C</strong> (mín/máx aparentes). <span id="feelSummary">Analisando…</span>
+            <div class="data-source">Dados: Open-Meteo</div>
+          </div>
         </div>
 
         <div class="card">
           <h3>☀️ Índice UV — 15 dias</h3>
           <div class="chart-container"><canvas id="chartUV"></canvas></div>
-          <div class="chart-note">Colunas: <strong>UV diário máx</strong>. <span id="uvSummary">Analisando pico horário…</span></div>
+          <div class="chart-note">Colunas: <strong>UV diário máx</strong>. <span id="uvSummary">Analisando pico horário…</span>
+            <div class="data-source">Dados: Open-Meteo</div>
+          </div>
         </div>
 
         <div class="card">
@@ -223,12 +253,27 @@
             <div class="prob" id="peakProb">Probabilidade: --%</div>
           </div>
           <div class="extremes-info">
-            <div id="extremes">Mais frio: -- • Mais quente: --</div>
+            <div id="extremesTemp">Mais frio: -- • Mais quente: --</div>
+            <div id="extremesMin">Mínima mais baixa: --</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>ℹ️ Por que diferenças com Climatempo?</h3>
+          <div class="info-box">
+            <p>As diferenças entre esta previsão e o Climatempo podem ocorrer por vários motivos:</p>
+            <ul>
+              <li><strong>Modelos diferentes:</strong> Open-Meteo usa modelos europeus (ECMWF), Climatempo pode usar modelos americanos (GFS)</li>
+              <li><strong>Resolução espacial:</strong> Modelos têm diferentes níveis de detalhe geográfico</li>
+              <li><strong>Atualização:</strong> Frequência de atualização dos dados pode variar</li>
+              <li><strong>Algoritmos:</strong> Processamento e interpretação dos dados brutos</li>
+            </ul>
+            <p>Ambos os serviços são válidos, mas podem apresentar variações normais em previsões meteorológicas.</p>
           </div>
         </div>
       </div>
       
-      <div class="data-source">
+      <div class="data-source" style="margin-top: 20px; text-align: center; font-size: 12px;">
         Dados: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open‑Meteo</a> • 
         Endereço via <a href="https://www.bigdatacloud.com/" target="_blank" rel="noopener">BigDataCloud</a>
       </div>
@@ -361,18 +406,69 @@ window.addEventListener('DOMContentLoaded', function() {
       });
   }
 
+  function createNoDataChart(canvasId, message) {
+    const ctx = $(canvasId).getContext('2d');
+    
+    // Clear any existing chart
+    if (state.charts[canvasId.replace('chart', '').toLowerCase()]) {
+      state.charts[canvasId.replace('chart', '').toLowerCase()].destroy();
+    }
+    
+    // Create a simple chart with no data message
+    state.charts[canvasId.replace('chart', '').toLowerCase()] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: []
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            enabled: false
+          }
+        },
+        scales: {
+          x: { display: false },
+          y: { display: false }
+        }
+      },
+      plugins: [{
+        id: 'no-data',
+        afterDraw: function(chart) {
+          const ctx = chart.ctx;
+          const width = chart.width;
+          const height = chart.height;
+          
+          ctx.save();
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.font = '14px Inter';
+          ctx.fillStyle = 'var(--muted)';
+          ctx.fillText(message, width / 2, height / 2);
+          ctx.restore();
+        }
+      }]
+    });
+  }
+
   function loadForecast() {
     try {
       const now = Date.now();
       if (now - state.lastUpdate < 15000) return;
       state.lastUpdate = now;
       
+      // Atualizando a URL para incluir parâmetros de sensação térmica e UV
       const url = new URL('https://api.open-meteo.com/v1/forecast');
       url.search = new URLSearchParams({
         latitude: state.pos.lat,
         longitude: state.pos.lon,
-        hourly: 'temperature_2m,relativehumidity_2m,precipitation,precipitation_probability,rain,showers,weathercode',
-        daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode',
+        hourly: 'temperature_2m,relativehumidity_2m,precipitation,precipitation_probability,rain,showers,weathercode,apparent_temperature,uv_index',
+        daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,apparent_temperature_max,apparent_temperature_min,uv_index_max',
         timezone: 'America/Sao_Paulo',
         forecast_days: 16
       }).toString();
@@ -643,6 +739,172 @@ window.addEventListener('DOMContentLoaded', function() {
             }
           });
 
+          // Thermal sensation chart (min/max daily) - if available
+          if (D.apparent_temperature_min && D.apparent_temperature_max) {
+            const fLabels = [];
+            const fMin = [];
+            const fMax = [];
+            
+            for (let fd = 0; fd < 15 && fd < D.time.length; fd++) {
+              const fdd = new Date(D.time[fd]);
+              fLabels.push(fdd.toLocaleDateString('pt-BR', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short'
+              }));
+              
+              fMin.push((D.apparent_temperature_min && D.apparent_temperature_min[fd] != null) ? D.apparent_temperature_min[fd] : null);
+              fMax.push((D.apparent_temperature_max && D.apparent_temperature_max[fd] != null) ? D.apparent_temperature_max[fd] : null);
+            }
+            
+            const ctxF = $('chartFeel').getContext('2d');
+            if (state.charts.feel) state.charts.feel.destroy();
+            
+            state.charts.feel = new Chart(ctxF, {
+              type: 'line',
+              data: {
+                labels: fLabels,
+                datasets: [
+                  {
+                    label: 'Sens. Mínima (°C)',
+                    data: fMin,
+                    yAxisID: 'fy',
+                    borderColor: 'rgba(100,149,237,1)',
+                    backgroundColor: 'rgba(100,149,237,.1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    tension: 0.25
+                  },
+                  {
+                    label: 'Sens. Máxima (°C)',
+                    data: fMax,
+                    yAxisID: 'fy',
+                    borderColor: 'rgba(255,165,0,1)',
+                    backgroundColor: 'rgba(255,165,0,.1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    tension: 0.25
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                  fy: {
+                    beginAtZero: false,
+                    title: { display: true, text: '°C' },
+                    grid: { color: 'rgba(2,12,27,.08)' }
+                  },
+                  x: {
+                    grid: { color: 'rgba(2,12,27,.06)' }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    labels: {
+                      font: { family: 'Inter', size: 12 }
+                    }
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(255,255,255,.95)',
+                    titleColor: '#0f172a',
+                    bodyColor: '#0f172a',
+                    borderColor: '#d5e1ee',
+                    borderWidth: 1
+                  }
+                }
+              }
+            });
+            
+            $('feelSummary').textContent = 'Variação entre ' + 
+              Math.min(...fMin.filter(v => v !== null)).toFixed(1) + '°C e ' + 
+              Math.max(...fMax.filter(v => v !== null)).toFixed(1) + '°C';
+          } else {
+            createNoDataChart('chartFeel', 'Dados de sensação térmica não disponíveis');
+            $('feelSummary').textContent = 'Dados de sensação térmica não disponíveis';
+          }
+
+          // UV index chart - if available
+          if (D.uv_index_max) {
+            const uLabels = [];
+            const uMax = [];
+            
+            for (let ud = 0; ud < 15 && ud < D.time.length; ud++) {
+              const udd = new Date(D.time[ud]);
+              uLabels.push(udd.toLocaleDateString('pt-BR', {
+                weekday: 'short',
+                day: '2-digit',
+                month: 'short'
+              }));
+              
+              uMax.push((D.uv_index_max && D.uv_index_max[ud] != null) ? D.uv_index_max[ud] : 0);
+            }
+            
+            const ctxU = $('chartUV').getContext('2d');
+            if (state.charts.uv) state.charts.uv.destroy();
+            
+            const gradU = ctxU.createLinearGradient(0, 0, 0, 320);
+            gradU.addColorStop(0, 'rgba(255,215,0,.9)');
+            gradU.addColorStop(1, 'rgba(255,215,0,.25)');
+            
+            state.charts.uv = new Chart(ctxU, {
+              type: 'bar',
+              data: {
+                labels: uLabels,
+                datasets: [
+                  {
+                    label: 'Índice UV Máx.',
+                    data: uMax,
+                    yAxisID: 'uy',
+                    backgroundColor: gradU,
+                    borderColor: 'rgba(255,165,0,1)',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    maxBarThickness: 28
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                  uy: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'UV' },
+                    grid: { color: 'rgba(2,12,27,.08)' }
+                  },
+                  x: {
+                    grid: { color: 'rgba(2,12,27,.06)' }
+                  }
+                },
+                plugins: {
+                  legend: {
+                    labels: {
+                      font: { family: 'Inter', size: 12 }
+                    }
+                  },
+                  tooltip: {
+                    backgroundColor: 'rgba(255,255,255,.95)',
+                    titleColor: '#0f172a',
+                    bodyColor: '#0f172a',
+                    borderColor: '#d5e1ee',
+                    borderWidth: 1
+                  }
+                }
+              }
+            });
+            
+            // Find peak UV
+            let peakUV = Math.max(...uMax.filter(v => v !== null));
+            $('uvSummary').textContent = 'Pico máximo: ' + peakUV.toFixed(1);
+          } else {
+            createNoDataChart('chartUV', 'Dados de UV não disponíveis');
+            $('uvSummary').textContent = 'Dados de UV não disponíveis';
+          }
+
           // Find temperature extremes
           let cold = { t: +Infinity, time: null };
           let hot = { t: -Infinity, time: null };
@@ -662,8 +924,19 @@ window.addEventListener('DOMContentLoaded', function() {
             }
           }
           
+          // Find minimum temperature in the forecast
+          let minTemp = { t: +Infinity, time: null };
+          for (let td = 0; td < 15 && td < D.time.length; td++) {
+            const tMinVal = (D.temperature_2m_min && D.temperature_2m_min[td] != null) ? D.temperature_2m_min[td] : null;
+            if (tMinVal !== null && tMinVal < minTemp.t) {
+              minTemp.t = tMinVal;
+              minTemp.time = D.time[td];
+            }
+          }
+          
           let coldStr = '--';
           let hotStr = '--';
+          let minTempStr = '--';
           
           if (cold.time) {
             const cd = new Date(cold.time);
@@ -689,15 +962,22 @@ window.addEventListener('DOMContentLoaded', function() {
             }) + ' • ' + hot.t.toFixed(1) + '°C';
           }
           
-          $('extremes').textContent = 'Mais frio: ' + coldStr + ' • Mais quente: ' + hotStr;
+          if (minTemp.time) {
+            const md = new Date(minTemp.time);
+            minTempStr = md.toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              day: '2-digit',
+              month: 'long'
+            }) + ' • ' + minTemp.t.toFixed(1) + '°C';
+          }
+          
+          $('extremesTemp').textContent = 'Mais frio: ' + coldStr + ' • Mais quente: ' + hotStr;
+          $('extremesMin').textContent = 'Mínima mais baixa: ' + minTempStr;
           
           // Update chart summaries
           $('tempSummary').textContent = 'Variação entre ' + 
             Math.min(...tMin.filter(v => v !== null)).toFixed(1) + '°C e ' + 
             Math.max(...tMax.filter(v => v !== null)).toFixed(1) + '°C';
-            
-          $('feelSummary').textContent = 'Dados de sensação térmica não disponíveis na API atual';
-          $('uvSummary').textContent = 'Dados de UV não disponíveis na API atual';
 
         })
         .catch(function(e) {
