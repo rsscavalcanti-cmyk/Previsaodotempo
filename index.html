@@ -4,17 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Previsão do Tempo Renato Stofel</title>
-  <meta name="description" content="Mapa com imagens de satélite NASA, radar de chuva e previsão Open-Meteo" />
+  <meta name="description" content="Previsão do tempo com gráfico de 15 dias e alertas de chuva" />
   <meta name="theme-color" content="#0b2a4a" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#0b1220; --ink:#e5ecf5; --muted:#9fb3c8; --card:#0f172a; --head:#111827;
-      --accent:#38bdf8; --ok:#16a34a; --warn:#f59e0b; --bad:#ef4444; --hair:#ffffff22;
+      --bg:#f0f8ff; --ink:#2c3e50; --muted:#7f8c8d; --card:#ffffff; --head:#3498db;
+      --accent:#3498db; --ok:#27ae60; --warn:#f39c12; --bad:#e74c3c; --hair:#bdc3c7;
+      --shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
-    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans';
-         color:var(--ink); background:var(--bg); transition: background 1.5s ease}
+    body{
+      font-family: 'Open Sans', sans-serif;
+      color:var(--ink); 
+      background:var(--bg); 
+      transition: background 1.5s ease;
+      line-height: 1.6;
+    }
     
     /* Backgrounds dinâmicos baseados no tempo */
     body.sunny{background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%)}
@@ -23,165 +30,274 @@
     body.night{background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)}
     body.stormy{background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)}
     
-    .app{display:grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; min-height:100vh}
+    .app{
+      display:grid; 
+      grid-template-columns: 1fr; 
+      grid-template-rows: auto 1fr auto; 
+      min-height:100vh;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+    }
     
-    header{padding:12px 15px; background:rgba(17, 24, 39, 0.85); border-bottom:1px solid var(--hair); 
-           display:flex; flex-wrap: wrap; gap:10px; align-items:center; justify-content:space-between;
-           backdrop-filter: blur(10px);}
-    header .title{display:flex; gap:12px; align-items:center}
-    header h1{font-size:18px; margin:0; font-weight:700}
-    header .sub{font-size:13px; color:var(--muted)}
+    header{
+      padding:20px 0; 
+      background:rgba(255, 255, 255, 0.9); 
+      border-bottom:1px solid var(--hair); 
+      display:flex; 
+      flex-wrap: wrap; 
+      gap:15px; 
+      align-items:center; 
+      justify-content:space-between;
+      backdrop-filter: blur(10px);
+      border-radius: 0 0 15px 15px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    header .title{display:flex; gap:15px; align-items:center}
+    header h1{
+      font-size:24px; 
+      margin:0; 
+      font-weight:700;
+      font-family: 'Poppins', sans-serif;
+      color: var(--head);
+    }
+    header .sub{
+      font-size:14px; 
+      color:var(--muted);
+      font-weight: 300;
+    }
     
-    .map-wrap{position:relative; height:65vh}
-    #map{position:absolute; inset:0}
-    
-    .panel{display:grid; gap:12px; padding:12px; background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px);}
-    .cards{display:grid; grid-template-columns: 1fr; gap:12px}
+    .panel{
+      display:grid; 
+      gap:20px; 
+      padding:20px; 
+      background:rgba(255, 255, 255, 0.85); 
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .cards{display:grid; grid-template-columns: 1fr; gap:20px}
     
     @media (min-width:980px){
-      .app{grid-template-columns: 1.3fr 1fr; grid-template-rows: auto 1fr}
-      .map-wrap{grid-column:1/2; grid-row:2/3; height:auto}
-      .panel{grid-column:2/3; grid-row:2/3; overflow:auto; max-height: calc(100vh - 80px)}
+      .app{grid-template-columns: 1fr; grid-template-rows: auto 1fr auto}
+      .panel{grid-column:1/-1; grid-row:2/3}
       header{grid-column:1/-1}
       .cards{grid-template-columns: repeat(2, minmax(0,1fr))}
     }
     
-    .card{background:rgba(15, 23, 42, 0.7); border:1px solid var(--hair); border-radius:14px; padding:12px; backdrop-filter: blur(5px);}
-    .card h3{margin:0 0 8px 0; font-size:15px; color:var(--accent)}
-    
-    .kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
-    .kpi{background:rgba(11, 19, 40, 0.7); border:1px solid var(--hair); border-radius:12px; padding:10px; text-align:center}
-    .kpi .v{font-size:20px; font-weight:700; margin-bottom:4px}
-    .kpi .l{font-size:12px; color:var(--muted)}
-    
-    .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
-    button, select, input[type="datetime-local"]{
-      background:rgba(11, 19, 40, 0.7); color:var(--ink); border:1px solid var(--hair); border-radius:10px; padding:8px 12px; font-size:14px; cursor:pointer
+    .card{
+      background:rgba(255, 255, 255, 0.95); 
+      border:1px solid var(--hair); 
+      border-radius:15px; 
+      padding:20px; 
+      backdrop-filter: blur(5px);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
     }
-    button:hover, select:hover{outline:1px solid var(--accent); background:rgba(15, 26, 51, 0.8)}
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .card h3{
+      margin:0 0 15px 0; 
+      font-size:18px; 
+      color:var(--accent);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 8px;
+    }
     
-    .small{font-size:12px; color:var(--muted)}
-    footer{padding:10px 15px; border-top:1px solid var(--hair); background:rgba(11, 18, 32, 0.85); 
-           font-size:12px; color:var(--muted); text-align:center; backdrop-filter: blur(10px);}
-    a{color:var(--accent); text-decoration:none}
-    a:hover{text-decoration:underline}
+    .kpis{
+      display:grid; 
+      grid-template-columns: repeat(3,1fr); 
+      gap:15px;
+      margin-top: 15px;
+    }
+    .kpi{
+      background:rgba(240, 248, 255, 0.8); 
+      border:1px solid var(--hair); 
+      border-radius:12px; 
+      padding:15px; 
+      text-align:center;
+      transition: all 0.3s ease;
+    }
+    .kpi:hover {
+      background: rgba(240, 248, 255, 1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .kpi .v{
+      font-size:24px; 
+      font-weight:700; 
+      margin-bottom:5px;
+      font-family: 'Poppins', sans-serif;
+      color: var(--head);
+    }
+    .kpi .l{
+      font-size:14px; 
+      color:var(--muted);
+      font-weight: 500;
+    }
     
-    button.on{outline:1px solid var(--accent); border-color: var(--accent); background:rgba(15, 26, 51, 0.8)}
-    #gpsStatus{margin-left:6px}
-
-    /* === Uber-like blue dot (pulsing) === */
-    .uber-dot{position:relative; width:16px; height:16px;}
-    .uber-dot .core{position:absolute; inset:0; border-radius:50%; background:#3b82f6; box-shadow:0 0 0 2px #fff;}
-    .uber-dot .pulse{position:absolute; inset:-6px; border-radius:50%; border:2px solid #60a5fa; opacity:0; animation:pulse 2s ease-out infinite}
-    @keyframes pulse{ 0%{transform:scale(0.6); opacity:0.6} 70%{transform:scale(1.6); opacity:0} 100%{transform:scale(1.8); opacity:0} }
+    .toolbar{
+      display:flex; 
+      flex-wrap:wrap; 
+      gap:10px; 
+      align-items:center;
+    }
+    button, select, input[type="datetime-local"]{
+      background:rgba(255, 255, 255, 0.9); 
+      color:var(--ink); 
+      border:1px solid var(--hair); 
+      border-radius:10px; 
+      padding:10px 15px; 
+      font-size:14px; 
+      cursor:pointer;
+      font-family: 'Open Sans', sans-serif;
+      transition: all 0.3s ease;
+    }
+    button:hover, select:hover{
+      outline:1px solid var(--accent); 
+      background:rgba(255, 255, 255, 1);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .small{
+      font-size:12px; 
+      color:var(--muted);
+    }
+    footer{
+      padding:15px; 
+      border-top:1px solid var(--hair); 
+      background:rgba(255, 255, 255, 0.9); 
+      font-size:12px; 
+      color:var(--muted); 
+      text-align:center; 
+      backdrop-filter: blur(10px);
+      border-radius: 15px 15px 0 0;
+      box-shadow: var(--shadow);
+    }
+    a{
+      color:var(--accent); 
+      text-decoration:none;
+      font-weight: 600;
+    }
+    a:hover{
+      text-decoration:underline;
+    }
+    
+    button.on{
+      outline:1px solid var(--accent); 
+      border-color: var(--accent); 
+      background:rgba(52, 152, 219, 0.1);
+    }
 
     /* Alert styles */
-    .alert{padding:8px 10px; border-radius:8px; font-size:14px; transition:all 0.3s ease; margin-top:8px}
-    .alert.ok{background:rgba(22, 163, 74, 0.2); border-left:4px solid var(--ok)}
-    .alert.bad{background:rgba(239, 68, 68, 0.2); border-left:4px solid var(--bad)}
-    .alert.warn{background:rgba(245, 158, 11, 0.2); border-left:4px solid var(--warn)}
+    .alert{
+      padding:12px 15px; 
+      border-radius:10px; 
+      font-size:14px; 
+      transition:all 0.3s ease; 
+      margin-top:10px;
+      font-weight: 500;
+    }
+    .alert.ok{
+      background:rgba(39, 174, 96, 0.1); 
+      border-left:4px solid var(--ok);
+      color: var(--ok);
+    }
+    .alert.bad{
+      background:rgba(231, 76, 60, 0.1); 
+      border-left:4px solid var(--bad);
+      color: var(--bad);
+    }
+    .alert.warn{
+      background:rgba(243, 156, 18, 0.1); 
+      border-left:4px solid var(--warn);
+      color: var(--warn);
+    }
     
     /* Loading indicator */
-    .loading{display:inline-block; width:16px; height:16px; border:2px solid transparent; border-top:2px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite}
-    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .loading{
+      display:inline-block; 
+      width:16px; 
+      height:16px; 
+      border:2px solid transparent; 
+      border-top:2px solid var(--accent); 
+      border-radius:50%; 
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{
+      0%{transform:rotate(0deg)}
+      100%{transform:rotate(360deg)}
+    }
 
-    /* Layer control */
-    .layer-control {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 1000;
-      background: rgba(15, 23, 42, 0.85);
-      border: 1px solid var(--hair);
-      border-radius: 10px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-      backdrop-filter: blur(5px);
-    }
-    
-    .layer-control label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      cursor: pointer;
-      padding: 4px;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-    
-    .layer-control label:hover {
-      background: rgba(255,255,255,0.05);
-    }
-    
-    .layer-control input[type="radio"] {
-      margin: 0;
-    }
-    
     /* Current conditions */
     .current-conditions {
       display: flex;
       align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 15px;
+      margin-bottom: 15px;
     }
     
     .temp {
-      font-size: 24px;
+      font-size: 36px;
       font-weight: 700;
+      font-family: 'Poppins', sans-serif;
+      color: var(--head);
     }
     
     .condition {
-      font-size: 14px;
+      font-size: 16px;
       color: var(--muted);
+      font-weight: 500;
     }
     
     /* Humidity indicator */
     .humidity {
       display: flex;
       align-items: center;
-      gap: 5px;
-      margin-top: 5px;
-      font-size: 13px;
+      gap: 8px;
+      margin-top: 10px;
+      font-size: 14px;
       color: var(--muted);
     }
     
     .humidity-bar {
       flex-grow: 1;
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 2px;
+      height: 6px;
+      background: rgba(189, 195, 199, 0.3);
+      border-radius: 3px;
       overflow: hidden;
     }
     
     .humidity-fill {
       height: 100%;
-      background: #38bdf8;
-      border-radius: 2px;
+      background: var(--accent);
+      border-radius: 3px;
       transition: width 0.5s ease;
     }
     
     /* Weather icon */
     .weather-icon {
-      font-size: 24px;
-      margin-right: 5px;
+      font-size: 36px;
+      margin-right: 10px;
     }
     
     /* GPS Status */
     .gps-indicator {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 14px;
       color: var(--muted);
+      font-weight: 500;
     }
     
     .gps-dot {
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background-color: var(--ok);
       animation: pulse 2s infinite;
@@ -195,53 +311,88 @@
       background-color: var(--bad);
     }
     
+    /* Peak rain info */
+    .peak-rain {
+      background: linear-gradient(135deg, #3498db, #2c3e50);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .peak-rain h4 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .peak-rain .time {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .peak-rain .prob {
+      font-size: 16px;
+      opacity: 0.9;
+    }
+    
+    /* Chart container */
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+    
     /* Responsive improvements for mobile */
     @media (max-width:768px){
       .app{grid-template-rows: auto 1fr auto}
-      .map-wrap{height:55vh}
       .cards{grid-template-columns: 1fr}
       .toolbar{flex-direction:column; align-items:stretch}
       .toolbar > *{flex:1}
-      header .title h1{font-size:16px}
-      header .sub{font-size:12px}
+      header .title h1{font-size:20px}
+      header .sub{font-size:13px}
       .kpis{grid-template-columns: repeat(3,1fr)}
-      .kpi .v{font-size:18px}
-      .kpi .l{font-size:11px}
-      .layer-control {
-        top: 5px;
-        right: 5px;
-        padding: 8px;
+      .kpi .v{font-size:20px}
+      .kpi .l{font-size:12px}
+      .current-conditions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .temp {
+        font-size: 28px;
       }
     }
     
     @media (max-width:480px){
-      .map-wrap{height:50vh}
-      header{padding:10px 12px}
-      .panel{padding:10px}
-      .card{padding:10px}
-      .kpis{grid-template-columns: 1fr; gap:8px}
-      .kpi{padding:8px}
+      header{padding:15px}
+      .panel{padding:15px}
+      .card{padding:15px}
+      .kpis{grid-template-columns: 1fr; gap:10px}
+      .kpi{padding:12px}
       .toolbar button, .toolbar select, .toolbar input[type="datetime-local"]{
-        padding:8px 10px; font-size:13px
+        padding:10px 12px; font-size:13px
       }
-      .temp { font-size: 20px; }
+      .temp { font-size: 24px; }
+      .weather-icon { font-size: 28px; }
     }
   </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="cloudy">
   <div class="app">
     <header>
       <div class="title">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/>
           <path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
         </svg>
         <div>
           <h1>Previsão do Tempo Renato Stofel</h1>
-          <div class="sub">Imagens de satélite NASA • Radar de chuva • Previsão Open-Meteo</div>
+          <div class="sub">Previsão de chuva para 15 dias • Alertas meteorológicos</div>
         </div>
       </div>
       <div class="toolbar">
@@ -250,24 +401,8 @@
           <span id="gpsStatus">Buscando localização...</span>
         </div>
         <button id="btnZN">🗺️ Zona Norte RJ</button>
-        <label class="small">Data/hora (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
-        <button id="btnNow">🔄 Agora</button>
-        <select id="opacitySel" title="Opacidade">
-          <option value="0.7">Opacidade 70%</option>
-          <option value="0.9">Opacidade 90%</option>
-          <option value="1">Opacidade 100%</option>
-          <option value="0.5">Opacidade 50%</option>
-        </select>
       </div>
     </header>
-
-    <div class="map-wrap">
-      <div id="map"></div>
-      <div class="layer-control">
-        <label><input type="radio" name="layer" value="satellite" checked> 🌤️ Satélite (Nuvens NASA)</label>
-        <label><input type="radio" name="layer" value="precipitation"> 🌧️ Radar de Chuva</label>
-      </div>
-    </div>
 
     <section class="panel">
       <div class="cards">
@@ -275,8 +410,10 @@
           <h3>🌡️ Condições Atuais</h3>
           <div class="current-conditions">
             <span class="weather-icon" id="weatherIcon">☀️</span>
-            <div class="temp" id="currentTemp">--°C</div>
-            <div class="condition" id="currentCondition">Carregando...</div>
+            <div>
+              <div class="temp" id="currentTemp">--°C</div>
+              <div class="condition" id="currentCondition">Carregando...</div>
+            </div>
           </div>
           <div class="humidity">
             <span>Umidade:</span>
@@ -297,19 +434,30 @@
           <div class="alert" id="alertMsg">Carregando condições meteorológicas...</div>
         </div>
         
-        <div class="card" style="grid-column:1/-1">
-          <h3>📊 Previsão para as Próximas 48h</h3>
-          <canvas id="chart" height="140"></canvas>
+        <div class="card">
+          <h3>📊 Previsão de Chuva para 15 Dias</h3>
+          <div class="chart-container">
+            <canvas id="chart"></canvas>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3>⏰ Maior Probabilidade de Chuva</h3>
+          <div class="peak-rain">
+            <h4>Período com maior chance de chuva:</h4>
+            <div class="time" id="peakTime">--</div>
+            <div class="prob" id="peakProb">Probabilidade: --%</div>
+          </div>
         </div>
       </div>
       
-      <div class="small" style="margin-top:10px; text-align:center">
-        Dados de satélite: NASA GIBS • Previsão: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Mapa base: © OpenStreetMap
+      <div class="small" style="margin-top:15px; text-align:center">
+        Dados de previsão: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a>
       </div>
     </section>
 
     <footer>
-      Atualizado automaticamente • GPS sempre ativo para acompanhar sua localização em tempo real
+      Atualizado automaticamente • GPS ativo para acompanhar sua localização em tempo real
     </footer>
   </div>
 
@@ -320,192 +468,19 @@
     const gpsStatus = $('gpsStatus');
     const gpsDot = $('gpsDot');
     const btnZN = $('btnZN');
-    const timeInput = $('timeIso');
-    const btnNow = $('btnNow');
-    const opacitySel = $('opacitySel');
     const alertMsg = $('alertMsg');
-    const layerControls = document.querySelectorAll('input[name="layer"]');
     const currentTemp = $('currentTemp');
     const currentCondition = $('currentCondition');
     const humidityValue = $('humidityValue');
     const humidityBar = $('humidityBar');
     const weatherIcon = $('weatherIcon');
+    const peakTime = $('peakTime');
+    const peakProb = $('peakProb');
 
     // ===== Config =====
-    const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
+    const ZONA_NORTE = { lat: -22.86, lon: -43.28 };
     let current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
-    let currentLayerType = 'satellite';
     let watchId = null;
-
-    // ===== Map (Leaflet) =====
-    const map = L.map('map', { 
-      zoomControl: true, 
-      worldCopyJump: true,
-      preferCanvas: true
-    }).setView([current.lat, current.lon], ZONA_NORTE.zoom);
-    
-    // Adicionar camada base do OpenStreetMap
-    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-      maxZoom: 19, 
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
-    
-    // Camada de satélite da NASA GIBS (MODIS True Color) - Corrigida para nuvens
-    const nasaBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
-    const nasaLayer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
-    // Obter a data atual para a camada
-    const today = new Date();
-    const nasaTime = today.toISOString().split('T')[0]; // Data atual
-    
-    const nasaUrl = `${nasaBase}/${nasaLayer}/default/${nasaTime}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
-    
-    const satelliteLayer = L.tileLayer(nasaUrl, {
-      maxZoom: 9,
-      attribution: 'Imagery &copy; NASA EOSDIS',
-      opacity: 0.8,
-      errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-    });
-    
-    // Adicionar camada base por padrão
-    satelliteLayer.addTo(map);
-
-    // NASA GIBS IMERG (Chuva)
-    const gibsBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
-    const gibsLayer = 'GPM_3IMERGHH_06_precipitationCal';
-    const gibsTms = 'GoogleMapsCompatible_Level9';
-    const gibsUrl = (iso) => `${gibsBase}/${gibsLayer}/default/${iso}/${gibsTms}/{z}/{y}/{x}.png`;
-
-    const roundTo30UTC = (d) => { 
-      const x = new Date(d); 
-      x.setUTCMinutes(x.getUTCMinutes() - (x.getUTCMinutes() % 30), 0, 0); 
-      return x; 
-    };
-    
-    const toIsoZ = (d) => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
-
-    let timeNowUTC = roundTo30UTC(new Date());
-    const setTimeInput = (d) => { 
-      // Converter UTC para horário local sem alterar o tempo real
-      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
-      timeInput.value = local.toISOString().slice(0, 16); 
-    };
-    setTimeInput(timeNowUTC);
-
-    let currentOverlayLayer = null;
-    
-    function refreshLayer() {
-      // Remover camada anterior se existir
-      if (currentOverlayLayer) {
-        map.removeLayer(currentOverlayLayer);
-      }
-      
-      // Configurar camada base
-      if (currentLayerType === 'satellite') {
-        map.removeLayer(osmLayer);
-        satelliteLayer.addTo(map);
-        satelliteLayer.setOpacity(parseFloat(opacitySel.value || '0.8'));
-      } else if (currentLayerType === 'precipitation') {
-        map.removeLayer(satelliteLayer);
-        osmLayer.addTo(map);
-        
-        // Para a camada de precipitação, precisamos da data
-        if (!timeInput.value) return;
-        
-        const localDate = new Date(timeInput.value);
-        // Converter para UTC (adicionando o offset do fuso horário)
-        const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
-        const roundedDate = roundTo30UTC(utcDate);
-        const isoZ = toIsoZ(roundedDate);
-        
-        // Criar nova camada
-        currentOverlayLayer = L.tileLayer(gibsUrl(isoZ), { 
-          tileSize: 256, 
-          opacity: parseFloat(opacitySel.value || '0.7'), 
-          attribution: 'NASA GIBS / IMERG (Precipitação)',
-          minZoom: 1,
-          maxZoom: 9,
-          errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-        });
-        
-        currentOverlayLayer.addTo(map);
-      }
-    }
-
-    // Inicializar a camada
-    refreshLayer();
-    
-    // Event listeners para controles de camada
-    layerControls.forEach(control => {
-      control.addEventListener('change', (e) => {
-        currentLayerType = e.target.value;
-        refreshLayer();
-        
-        // Atualizar interface baseado na seleção
-        if (currentLayerType === 'precipitation') {
-          timeInput.disabled = false;
-          btnNow.disabled = false;
-        } else {
-          timeInput.disabled = true;
-          btnNow.disabled = true;
-        }
-      });
-    });
-    
-    // Event listeners para opacidade e tempo
-    opacitySel.addEventListener('change', () => {
-      if (currentLayerType === 'satellite' && satelliteLayer) {
-        satelliteLayer.setOpacity(parseFloat(opacitySel.value));
-      } else if (currentLayerType === 'precipitation' && currentOverlayLayer) {
-        currentOverlayLayer.setOpacity(parseFloat(opacitySel.value));
-      }
-    });
-    
-    btnNow.addEventListener('click', () => { 
-      timeNowUTC = roundTo30UTC(new Date()); 
-      setTimeInput(timeNowUTC); 
-      if (currentLayerType === 'precipitation') {
-        refreshLayer();
-      }
-    });
-    
-    timeInput.addEventListener('change', () => {
-      if (currentLayerType === 'precipitation') {
-        refreshLayer();
-      }
-    });
-
-    // ===== Uber-style GPS marker =====
-    const dotHTML = '<div class="uber-dot"><div class="core"></div><div class="pulse"></div></div>';
-    const dotIcon = L.divIcon({ 
-      html: dotHTML, 
-      className: '', 
-      iconSize: [16, 16], 
-      iconAnchor: [8, 8] 
-    });
-    
-    const gpsMarker = L.marker([current.lat, current.lon], { 
-      icon: dotIcon, 
-      interactive: false,
-      zIndexOffset: 1000
-    }).addTo(map);
-    
-    const accCircle = L.circle([current.lat, current.lon], { 
-      radius: 40, 
-      color: '#60a5fa', 
-      weight: 1, 
-      fill: true, 
-      fillOpacity: 0.1,
-      fillColor: '#3b82f6'
-    }).addTo(map);
-
-    function moveGPS(lat, lon, acc) {
-      current = { lat, lon };
-      gpsMarker.setLatLng([lat, lon]);
-      accCircle.setLatLng([lat, lon]);
-      if (typeof acc === 'number' && isFinite(acc)) {
-        accCircle.setRadius(Math.max(10, acc));
-      }
-    }
 
     // ===== Função para atualizar o fundo baseado nas condições =====
     function updateBackground(weatherCode) {
@@ -597,7 +572,7 @@
           hourly: 'temperature_2m,relativehumidity_2m,precipitation,precipitation_probability,rain,showers,weathercode', 
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_hours,weathercode', 
           timezone: 'America/Sao_Paulo',
-          forecast_days: 3
+          forecast_days: 16 // 15 dias + hoje
         }).toString();
         
         const res = await fetch(url);
@@ -672,19 +647,47 @@
         alertMsg.textContent = alertText;
         alertMsg.className = 'alert ' + alertClass;
         
-        // Gráfico para próximas 48 horas
-        const endIdx = Math.min(nowIdx + 48, H.time.length);
-        const labels = H.time.slice(nowIdx, endIdx).map(t => {
-          const date = new Date(t);
-          return date.toLocaleString('pt-BR', { 
-            hour: '2-digit', 
-            day: '2-digit', 
-            month: '2-digit' 
-          });
+        // Encontrar pico de chuva nos próximos 15 dias
+        let peakIndex = nowIdx;
+        let peakProbability = 0;
+        
+        // Verificar apenas as próximas 360 horas (15 dias)
+        const maxHours = Math.min(nowIdx + 360, H.precipitation_probability.length);
+        for (let i = nowIdx; i < maxHours; i++) {
+          if (H.precipitation_probability[i] > peakProbability) {
+            peakProbability = H.precipitation_probability[i];
+            peakIndex = i;
+          }
+        }
+        
+        // Formatar data/hora do pico de chuva
+        const peakDate = new Date(H.time[peakIndex]);
+        const formattedDate = peakDate.toLocaleDateString('pt-BR', { 
+          weekday: 'long', 
+          day: 'numeric', 
+          month: 'long',
+          hour: '2-digit',
+          minute: '2-digit'
         });
         
-        const mm = H.precipitation.slice(nowIdx, endIdx);
-        const prob48 = H.precipitation_probability.slice(nowIdx, endIdx);
+        peakTime.textContent = formattedDate;
+        peakProb.textContent = `Probabilidade: ${peakProbability}%`;
+        
+        // Gráfico para próximos 15 dias (dados diários)
+        const dailyData = data.daily;
+        const daysToShow = 15;
+        
+        const labels = [];
+        const precipitationData = [];
+        const probabilityData = [];
+        
+        for (let i = 0; i < daysToShow && i < dailyData.time.length; i++) {
+          const date = new Date(dailyData.time[i]);
+          labels.push(date.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' }));
+          precipitationData.push(dailyData.precipitation_sum[i] || 0);
+          probabilityData.push(dailyData.precipitation_hours[i] ? 
+            Math.min(100, dailyData.precipitation_hours[i] * 6.25) : 0); // Aproximação baseada em horas de chuva
+        }
         
         const ctx = document.getElementById('chart').getContext('2d');
         if (chart) chart.destroy();
@@ -697,34 +700,35 @@
               {
                 type: 'bar',
                 label: 'Chuva (mm)',
-                data: mm,
+                data: precipitationData,
                 yAxisID: 'y',
-                backgroundColor: 'rgba(59, 130, 246, 0.7)',
-                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                borderColor: 'rgba(52, 152, 219, 1)',
                 borderWidth: 1
               },
               {
                 type: 'line',
                 label: 'Probabilidade (%)',
-                data: prob48,
+                data: probabilityData,
                 yAxisID: 'y1',
-                borderColor: 'rgba(239, 68, 68, 1)',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                borderColor: 'rgba(231, 76, 60, 1)',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
                 borderWidth: 2,
-                pointRadius: 2,
+                pointRadius: 3,
                 tension: 0.3
               }
             ]
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             interaction: { mode: 'index', intersect: false },
             scales: {
               y: {
                 beginAtZero: true,
                 position: 'left',
                 title: { display: true, text: 'mm' },
-                grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                grid: { color: 'rgba(0, 0, 0, 0.1)' }
               },
               y1: {
                 beginAtZero: true,
@@ -732,16 +736,32 @@
                 grid: { drawOnChartArea: false },
                 title: { display: true, text: '%' },
                 suggestedMax: 100,
-                ticks: { color: 'rgba(239, 68, 68, 1)' }
+                ticks: { color: 'rgba(231, 76, 60, 1)' }
               },
               x: {
-                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                ticks: { maxTicksLimit: 12 }
-            }
+                grid: { color: 'rgba(0, 0, 0, 0.1)' }
+              }
             },
             plugins: {
-              legend: { display: true, labels: { color: '#e5ecf5' } },
-              tooltip: { mode: 'index', intersect: false }
+              legend: { 
+                display: true, 
+                labels: { 
+                  color: '#2c3e50',
+                  font: {
+                    family: "'Open Sans', sans-serif",
+                    size: 12
+                  }
+                } 
+              },
+              tooltip: { 
+                mode: 'index', 
+                intersect: false,
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                titleColor: '#2c3e50',
+                bodyColor: '#2c3e50',
+                borderColor: '#bdc3c7',
+                borderWidth: 1
+              }
             }
           }
         });
@@ -759,6 +779,8 @@
         humidityValue.textContent = '--%';
         humidityBar.style.width = '0%';
         weatherIcon.textContent = '❓';
+        peakTime.textContent = '--';
+        peakProb.textContent = 'Probabilidade: --%';
         
         // Tentar novamente após 30 segundos
         setTimeout(loadForecast, 30000);
@@ -816,8 +838,7 @@
       navigator.geolocation.getCurrentPosition(
         position => {
           const { latitude, longitude, accuracy } = position.coords;
-          moveGPS(latitude, longitude, accuracy);
-          map.setView([latitude, longitude], 15);
+          current = { lat: latitude, lon: longitude };
           gpsStatus.textContent = 'Localização ativa';
           gpsDot.className = 'gps-dot';
           loadForecast();
@@ -826,6 +847,9 @@
           gpsStatus.textContent = 'Erro ao obter localização';
           gpsDot.className = 'gps-dot error';
           console.warn('GPS error:', error);
+          // Usar localização padrão (Zona Norte RJ)
+          current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
+          loadForecast();
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
@@ -834,8 +858,7 @@
       watchId = navigator.geolocation.watchPosition(
         position => {
           const { latitude, longitude, accuracy } = position.coords;
-          moveGPS(latitude, longitude, accuracy);
-          map.setView([latitude, longitude], Math.max(map.getZoom(), 15), { animate: false });
+          current = { lat: latitude, lon: longitude };
           gpsStatus.textContent = 'Localização ativa';
           gpsDot.className = 'gps-dot';
           loadForecast();
@@ -851,9 +874,7 @@
 
     // ===== Controls =====
     btnZN.addEventListener('click', () => {
-      map.setView([ZONA_NORTE.lat, ZONA_NORTE.lon], ZONA_NORTE.zoom);
       current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
-      moveGPS(current.lat, current.lon, 40);
       loadForecast();
     });
 
@@ -862,11 +883,8 @@
     
     // Atualizar previsão a cada 10 minutos
     setInterval(loadForecast, 600000);
-
-    // Desabilitar controles de tempo quando não na camada de precipitação
-    timeInput.disabled = true;
-    btnNow.disabled = true;
   });
 </script>
 </body>
 </html>
+
