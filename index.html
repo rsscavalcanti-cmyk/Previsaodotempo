@@ -106,80 +106,7 @@
       margin-left: auto;
     }
     
-    .data-source-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    /* Model switcher aprimorado */
-    .model-switcher {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding: 12px;
-      background: rgba(240, 248, 255, 0.8);
-      border-radius: 12px;
-      border: 1px solid rgba(52, 152, 219, 0.2);
-    }
-    
-    .model-indicator {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--muted);
-    }
-    
-    .model-dots {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .model-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--hair);
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .model-dot:hover {
-      transform: scale(1.1);
-    }
-    
-    .model-dot.active {
-      background: var(--accent);
-      transform: scale(1.3);
-      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
-    }
-    
-    .model-name {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--accent);
-      background: rgba(52, 152, 219, 0.15);
-      padding: 6px 12px;
-      border-radius: 16px;
-    }
-    
-    .swipe-hint {
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0.8;
-    }
-    
-    .swipe-hint::before {
-      content: '↔';
-      font-size: 16px;
-    }
+    .data-source-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
     .current-conditions { display:flex; gap:16px; align-items:center; margin-bottom: 12px; }
     .temp { font-size:38px; font-weight:700; font-family:'Poppins',sans-serif; color:var(--head) }
@@ -193,24 +120,9 @@
       position: relative;
       overflow: hidden;
     }
-    .kpi::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-    .kpi:hover {
-      background: linear-gradient(135deg, #eef7ff 0%, #e0f2fe 100%);
-      transform: translateY(-2px);
-    }
-    .kpi:hover::before {
-      transform: scaleX(1);
-    }
+    .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform 0.3s ease; }
+    .kpi:hover { background: linear-gradient(135deg, #eef7ff 0%, #e0f2fe 100%); transform: translateY(-2px); }
+    .kpi:hover::before { transform: scaleX(1); }
     .kpi .v { font-weight:700; font-size:22px; color:var(--head) }
     .kpi .l { font-size:13px; color:var(--muted); margin-top: 4px; }
 
@@ -223,140 +135,43 @@
       border-radius:16px; text-align:center; box-shadow:0 6px 15px rgba(0,0,0,.2);
       margin-bottom: 12px; position: relative; overflow: hidden;
     }
-    .peak-rain::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      animation: shimmer 3s ease-in-out infinite;
-    }
-    @keyframes shimmer {
-      0%, 100% { transform: rotate(0deg); }
-      50% { transform: rotate(180deg); }
-    }
+    .peak-rain::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 3s ease-in-out infinite; }
+    @keyframes shimmer { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(180deg); } }
     .peak-rain h4 { margin:0 0 8px; font-weight:700; font-size: 16px; }
     .peak-rain .time { font-size:20px; font-weight:700; margin-bottom: 6px; }
 
-    .alert { 
-      padding:16px 18px; border-radius:16px; font-size:15px; margin-top:8px; 
-      font-weight:600; transition:all 300ms ease; position: relative;
-    }
+    .alert { padding:16px 18px; border-radius:16px; font-size:15px; margin-top:8px; font-weight:600; transition:all 300ms ease; position: relative; }
     .alert.ok { background:rgba(22,163,74,.12); border-left:4px solid var(--ok); color:var(--ok) }
     .alert.warn { background:rgba(245,158,11,.12); border-left:4px solid var(--warn); color:var(--warn) }
     .alert.bad { background:rgba(239,68,68,.12); border-left:4px solid var(--bad); color:var(--bad) }
 
     .chart-container { 
-      position:relative; 
-      height:350px; 
-      width:100%;
-      touch-action: pan-y;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-      -webkit-tap-highlight-color: transparent;
-      border-radius: 12px;
-      overflow: hidden;
+      position:relative; height:350px; width:100%; touch-action: pan-y;
+      -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+      border-radius: 12px; overflow: hidden;
     }
     .chart-note { margin-top:12px; font-size:13px; color:var(--muted); text-align:center; line-height: 1.5; }
     
-    .data-source { 
-      text-align:center; font-size:11px; color:var(--muted); 
-      margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hair);
-      opacity: 0.8;
-    }
+    .data-source { text-align:center; font-size:11px; color:var(--muted); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--hair); opacity: 0.8; }
     
-    .extremes-info {
-      background: linear-gradient(135deg, rgba(240, 248, 255, 0.8) 0%, rgba(230, 245, 255, 0.8) 100%);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 12px;
-      font-size: 14px;
-      border: 1px solid rgba(52, 152, 219, 0.2);
-    }
+    .extremes-info { background: linear-gradient(135deg, rgba(240, 248, 255, 0.8) 0%, rgba(230, 245, 255, 0.8) 100%); border-radius: 12px; padding: 16px; margin-top: 12px; font-size: 14px; border: 1px solid rgba(52, 152, 219, 0.2); }
+    .extremes-info div { margin-bottom: 8px; }
     
-    .extremes-info div {
-      margin-bottom: 8px;
-    }
+    .no-data-message { display: flex; justify-content: center; align-items: center; height: 100%; color: var(--muted); font-style: italic; text-align: center; padding: 20px; }
     
-    .no-data-message {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      color: var(--muted);
-      font-style: italic;
-      text-align: center;
-      padding: 20px;
-    }
-    
-    .info-box {
-      background: linear-gradient(135deg, rgba(240, 248, 255, 0.8) 0%, rgba(230, 245, 255, 0.8) 100%);
-      border-radius: 12px;
-      padding: 16px;
-      margin-top: 12px;
-      font-size: 14px;
-      color: var(--muted);
-      border: 1px solid rgba(52, 152, 219, 0.2);
-    }
+    .info-box { background: linear-gradient(135deg, rgba(240, 248, 255, 0.8) 0%, rgba(230, 245, 255, 0.8) 100%); border-radius: 12px; padding: 16px; margin-top: 12px; font-size: 14px; color: var(--muted); border: 1px solid rgba(52, 152, 219, 0.2); }
 
-    /* Novos estilos para múltiplas fontes */
-    .multi-source-card {
-      background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%);
-    }
+    /* Estilos para múltiplas fontes */
+    .multi-source-card { background: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.98) 100%); }
 
-    .source-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      padding: 4px;
-      background: rgba(240, 248, 255, 0.6);
-      border-radius: 12px;
-    }
+    .source-tabs { display: flex; gap: 8px; margin-bottom: 16px; padding: 4px; background: rgba(240, 248, 255, 0.6); border-radius: 12px; }
 
-    .source-tab {
-      flex: 1;
-      padding: 8px 12px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
+    .source-tab { flex: 1; padding: 8px 12px; border: none; background: transparent; border-radius: 8px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.3s ease; }
+    .source-tab.active { background: var(--accent); color: white; box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3); }
+    .source-tab:hover:not(.active) { background: rgba(52, 152, 219, 0.1); color: var(--accent); }
 
-    .source-tab.active {
-      background: var(--accent);
-      color: white;
-      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
-    }
-
-    .source-tab:hover:not(.active) {
-      background: rgba(52, 152, 219, 0.1);
-      color: var(--accent);
-    }
-
-    .comparison-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-      padding: 8px 12px;
-      background: rgba(240, 248, 255, 0.5);
-      border-radius: 8px;
-    }
-
-    .comparison-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
+    .comparison-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 8px; padding: 8px 12px; background: rgba(240, 248, 255, 0.5); border-radius: 8px; }
+    .comparison-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 
     @media(max-width:480px){ 
       header{padding:14px} 
@@ -366,26 +181,12 @@
       .current-conditions { flex-direction: column; text-align: center; gap: 10px; }
       .chart-container { height: 280px; }
       .extremes-info { font-size: 13px; }
-      .model-switcher { flex-direction: column; gap: 10px; align-items: flex-start; }
       .source-tabs { flex-direction: column; }
     }
 
-    /* Animações aprimoradas */
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .card {
-      animation: fadeInUp 0.6s ease-out;
-    }
-
+    /* Animações */
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .card { animation: fadeInUp 0.6s ease-out; }
     .card:nth-child(1) { animation-delay: 0.1s; }
     .card:nth-child(2) { animation-delay: 0.2s; }
     .card:nth-child(3) { animation-delay: 0.3s; }
@@ -452,18 +253,6 @@
             <button class="source-tab" data-source="visualcrossing">Visual Crossing</button>
             <button class="source-tab" data-source="weatherapi">WeatherAPI</button>
           </div>
-          <div class="model-switcher">
-            <div class="model-indicator">
-              <span>Modelo:</span>
-              <div class="model-dots">
-                <div class="model-dot active" data-model="0"></div>
-                <div class="model-dot" data-model="1"></div>
-                <div class="model-dot" data-model="2"></div>
-              </div>
-              <span class="model-name" id="rainModelName">ECMWF (EUR)</span>
-            </div>
-            <div class="swipe-hint">Deslize para alternar</div>
-          </div>
           <div class="chart-container" id="rainChartContainer">
             <canvas id="chartRain"></canvas>
           </div>
@@ -472,7 +261,7 @@
               <span class="comparison-dot"></span>
               <span>Comparando 3 fontes de dados meteorológicos</span>
             </div>
-            <div class="data-source">Dados: <span id="rainDataSource">Open-Meteo (ECMWF)</span></div>
+            <div class="data-source">Dados: <span id="rainDataSource">Open-Meteo</span></div>
           </div>
         </div>
 
@@ -483,18 +272,6 @@
             <button class="source-tab" data-source="visualcrossing">Visual Crossing</button>
             <button class="source-tab" data-source="weatherapi">WeatherAPI</button>
           </div>
-          <div class="model-switcher">
-            <div class="model-indicator">
-              <span>Modelo:</span>
-              <div class="model-dots">
-                <div class="model-dot active" data-model="0"></div>
-                <div class="model-dot" data-model="1"></div>
-                <div class="model-dot" data-model="2"></div>
-              </div>
-              <span class="model-name" id="tempModelName">ECMWF (EUR)</span>
-            </div>
-            <div class="swipe-hint">Deslize para alternar</div>
-          </div>
           <div class="chart-container" id="tempChartContainer">
             <canvas id="chartTemp"></canvas>
           </div>
@@ -503,7 +280,7 @@
               <span class="comparison-dot"></span>
               <span>Comparando 3 fontes de dados meteorológicos</span>
             </div>
-            <div class="data-source">Dados: <span id="tempDataSource">Open-Meteo (ECMWF)</span></div>
+            <div class="data-source">Dados: <span id="tempDataSource">Open-Meteo</span></div>
           </div>
         </div>
 
@@ -514,18 +291,6 @@
             <button class="source-tab" data-source="visualcrossing">Visual Crossing</button>
             <button class="source-tab" data-source="weatherapi">WeatherAPI</button>
           </div>
-          <div class="model-switcher">
-            <div class="model-indicator">
-              <span>Modelo:</span>
-              <div class="model-dots">
-                <div class="model-dot active" data-model="0"></div>
-                <div class="model-dot" data-model="1"></div>
-                <div class="model-dot" data-model="2"></div>
-              </div>
-              <span class="model-name" id="feelModelName">ECMWF (EUR)</span>
-            </div>
-            <div class="swipe-hint">Deslize para alternar</div>
-          </div>
           <div class="chart-container" id="feelChartContainer">
             <canvas id="chartFeel"></canvas>
           </div>
@@ -534,7 +299,7 @@
               <span class="comparison-dot"></span>
               <span>Comparando 3 fontes de dados meteorológicos</span>
             </div>
-            <div class="data-source">Dados: <span id="feelDataSource">Open-Meteo (ECMWF)</span></div>
+            <div class="data-source">Dados: <span id="feelDataSource">Open-Meteo</span></div>
           </div>
         </div>
 
@@ -545,18 +310,6 @@
             <button class="source-tab" data-source="visualcrossing">Visual Crossing</button>
             <button class="source-tab" data-source="weatherapi">WeatherAPI</button>
           </div>
-          <div class="model-switcher">
-            <div class="model-indicator">
-              <span>Modelo:</span>
-              <div class="model-dots">
-                <div class="model-dot active" data-model="0"></div>
-                <div class="model-dot" data-model="1"></div>
-                <div class="model-dot" data-model="2"></div>
-              </div>
-              <span class="model-name" id="uvModelName">ECMWF (EUR)</span>
-            </div>
-            <div class="swipe-hint">Deslize para alternar</div>
-          </div>
           <div class="chart-container" id="uvChartContainer">
             <canvas id="chartUV"></canvas>
           </div>
@@ -565,7 +318,7 @@
               <span class="comparison-dot"></span>
               <span>Comparando 3 fontes de dados meteorológicos</span>
             </div>
-            <div class="data-source">Dados: <span id="uvDataSource">Open-Meteo (ECMWF)</span></div>
+            <div class="data-source">Dados: <span id="uvDataSource">Open-Meteo</span></div>
           </div>
         </div>
 
@@ -620,40 +373,27 @@
     const gpsStatus = $('gpsStatus');
     const gpsDot = $('gpsDot');
 
-    // Estado global aprimorado
+    // Estado global (sem modelos)
     const state = {
       pos: { lat: -22.86, lon: -43.28 },
       lastUpdate: 0,
       watchId: null,
       charts: {},
-      activeModels: { rain: 0, temp: 0, feel: 0, uv: 0 },
       activeSources: { rain: 'openmeteo', temp: 'openmeteo', feel: 'openmeteo', uv: 'openmeteo' },
-      modelData: {},
       sourceData: {}
     };
 
-    // Modelos meteorológicos expandidos
-    const MODELS = [
-      { id: 'ecmwf', name: 'ECMWF (EUR)', source: 'Open-Meteo', color: '#3498db' },
-      { id: 'gfs', name: 'GFS (USA)', source: 'Open-Meteo', color: '#e74c3c' },
-      { id: 'visual_crossing', name: 'Global Blend', source: 'Visual Crossing', color: '#f39c12' }
-    ];
-
     // Fontes de dados
     const DATA_SOURCES = {
-      openmeteo: { name: 'Open-Meteo', color: '#3498db', models: ['ecmwf', 'gfs'] },
-      visualcrossing: { name: 'Visual Crossing', color: '#f39c12', models: ['visual_crossing'] },
-      weatherapi: { name: 'WeatherAPI', color: '#9b59b6', models: ['weatherapi'] }
+      openmeteo: { name: 'Open-Meteo', color: '#3498db' },
+      visualcrossing: { name: 'Visual Crossing', color: '#f39c12' },
+      weatherapi: { name: 'WeatherAPI', color: '#9b59b6' }
     };
 
     // Relógio
     function updateClock() {
       const now = new Date();
-      clock.textContent = now.toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+      clock.textContent = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     }
     setInterval(updateClock, 1000);
     updateClock();
@@ -662,685 +402,224 @@
     function updateBackground(code) {
       document.body.className = '';
       const hour = new Date().getHours();
-      
-      if (hour < 6 || hour > 20) {
-        document.body.classList.add('night');
-      } else if ([95, 96, 99].includes(code)) {
-        document.body.classList.add('stormy');
-      } else if ([61, 63, 65, 80, 81, 82].includes(code)) {
-        document.body.classList.add('rainy');
-      } else if ([0, 1].includes(code)) {
-        document.body.classList.add('sunny');
-      } else {
-        document.body.classList.add('cloudy');
-      }
+      if (hour < 6 || hour > 20) document.body.classList.add('night');
+      else if ([95, 96, 99].includes(code)) document.body.classList.add('stormy');
+      else if ([61, 63, 65, 80, 81, 82].includes(code)) document.body.classList.add('rainy');
+      else if ([0, 1].includes(code)) document.body.classList.add('sunny');
+      else document.body.classList.add('cloudy');
     }
 
-    // Ícones do clima
+    // Ícones e descrições
     function getIcon(code) {
-      const mapD = {
-        0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 45: '🌫️', 48: '🌫️',
-        51: '🌦️', 53: '🌦️', 55: '🌦️', 61: '🌧️', 63: '🌧️', 65: '⛈️', 
-        80: '🌦️', 81: '⛈️', 82: '⛈️', 95: '⛈️', 96: '⛈️', 99: '⛈️'
-      };
+      const mapD = { 0:'☀️',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',48:'🌫️',51:'🌦️',53:'🌦️',55:'🌦️',61:'🌧️',63:'🌧️',65:'⛈️',80:'🌦️',81:'⛈️',82:'⛈️',95:'⛈️',96:'⛈️',99:'⛈️' };
       return mapD[code] || '🌤️';
     }
-    
-    function getDesc(code) { 
-      const d = {
-        0: 'Céu limpo', 1: 'Principalmente limpo', 2: 'Parcialmente nublado', 
-        3: 'Nublado', 45: 'Nevoeiro', 48: 'Nevoeiro', 51: 'Chuvisco leve', 
-        53: 'Chuvisco moderado', 55: 'Chuvisco denso', 61: 'Chuva leve', 
-        63: 'Chuva moderada', 65: 'Chuva forte', 80: 'Pancadas leves', 
-        81: 'Pancadas moderadas', 82: 'Pancadas fortes', 95: 'Trovoada', 
-        96: 'Trovoada com granizo', 99: 'Trovoada severa'
-      };
+    function getDesc(code) {
+      const d = { 0:'Céu limpo',1:'Principalmente limpo',2:'Parcialmente nublado',3:'Nublado',45:'Nevoeiro',48:'Nevoeiro',51:'Chuvisco leve',53:'Chuvisco moderado',55:'Chuvisco denso',61:'Chuva leve',63:'Chuva moderada',65:'Chuva forte',80:'Pancadas leves',81:'Pancadas moderadas',82:'Pancadas fortes',95:'Trovoada',96:'Trovoada com granizo',99:'Trovoada severa' };
       return d[code] || 'Condição desconhecida';
     }
 
     // Resolver endereço
     function resolveAddress(lat, lon) {
       fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`)
-        .then(function(res) { 
-          if (!res.ok) throw new Error('API error');
-          return res.json(); 
-        })
-        .then(function(j) { 
+        .then(res => { if (!res.ok) throw new Error('API error'); return res.json(); })
+        .then(j => {
           const parts = [j.locality || j.city || j.principalSubdivision, j.countryName].filter(Boolean);
           const admin = (j.localityInfo && j.localityInfo.administrative) ? j.localityInfo.administrative : [];
           const feats = (j.localityInfo && j.localityInfo.features) ? j.localityInfo.features : [];
-          
-          const neigh = admin.find(function(a) { 
-            const s = (a.description || a.name || '');
-            return /suburb|neighb|district|bairro|subd/i.test(s);
-          });
-          
-          const street = feats.find(function(f) { 
-            const s = (f.description || f.name || '');
-            return /road|street|avenue|avenida|rua|travessa/i.test(s);
-          });
-          
+          const neigh = admin.find(a => /suburb|neighb|district|bairro|subd/i.test((a.description || a.name || '')));
+          const street = feats.find(f => /road|street|avenue|avenida|rua|travessa/i.test((f.description || f.name || '')));
           let line = '';
-          if (street && street.name) {
-            line += street.name;
-          }
-          
-          if (neigh && neigh.name) {
-            line += (line ? ' — ' : '') + neigh.name;
-          }
-          
-          if (parts.length) {
-            line += (line ? ' • ' : '') + parts.join(' — ');
-          }
-          
+          if (street && street.name) line += street.name;
+          if (neigh && neigh.name) line += (line ? ' — ' : '') + neigh.name;
+          if (parts.length) line += (line ? ' • ' : '') + parts.join(' — ');
           addr.innerHTML = line ? `<strong>${line}</strong>` : '<strong>Localização aproximada detectada</strong>';
         })
-        .catch(function() { 
-          addr.textContent = 'Endereço indisponível'; 
-        });
+        .catch(() => { addr.textContent = 'Endereço indisponível'; });
     }
 
-    // Criar gráfico sem dados
+    // Sem dados
     function createNoDataChart(canvasId, message) {
       const ctx = $(canvasId).getContext('2d');
-      
-      if (state.charts[canvasId.replace('chart', '').toLowerCase()]) {
-        state.charts[canvasId.replace('chart', '').toLowerCase()].destroy();
-      }
-      
-      state.charts[canvasId.replace('chart', '').toLowerCase()] = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: [],
-          datasets: []
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { enabled: false }
-          },
-          scales: {
-            x: { display: false },
-            y: { display: false }
-          }
-        },
-        plugins: [{
-          id: 'no-data',
-          afterDraw: function(chart) {
-            const ctx = chart.ctx;
-            const width = chart.width;
-            const height = chart.height;
-            
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = '16px Inter';
-            ctx.fillStyle = 'var(--muted)';
-            ctx.fillText(message, width / 2, height / 2);
-            ctx.restore();
-          }
-        }]
+      const key = canvasId.replace('chart','').toLowerCase();
+      if (state.charts[key]) state.charts[key].destroy();
+      state.charts[key] = new Chart(ctx, {
+        type: 'line', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display:false }, tooltip:{ enabled:false } }, scales: { x:{ display:false }, y:{ display:false } } },
+        plugins: [{ id:'no-data', afterDraw: chart => { const c=chart.ctx,w=chart.width,h=chart.height; c.save(); c.textAlign='center'; c.textBaseline='middle'; c.font='16px Inter'; c.fillStyle='var(--muted)'; c.fillText(message,w/2,h/2); c.restore(); } }]
       });
     }
 
-    // Alternar fonte de dados
+    // Troca de fonte (abas)
     function switchDataSource(chartType, source) {
       state.activeSources[chartType] = source;
-      
-      // Atualizar indicadores visuais
       updateSourceIndicators(chartType);
-      
-      // Carregar dados da nova fonte
       loadSourceData(source, chartType);
     }
 
-    // Atualizar indicadores visuais da fonte
     function updateSourceIndicators(chartType) {
       const currentSource = state.activeSources[chartType];
       const sourceElement = $(`${chartType}CurrentSource`);
-      
-      if (sourceElement) {
-        sourceElement.textContent = DATA_SOURCES[currentSource].name;
-      }
-      
-      // Atualizar abas
+      if (sourceElement) sourceElement.textContent = DATA_SOURCES[currentSource].name;
       const container = $(`${chartType}ChartContainer`).closest('.card');
       const tabs = container.querySelectorAll('.source-tab');
-      tabs.forEach(tab => {
-        if (tab.dataset.source === currentSource) {
-          tab.classList.add('active');
-        } else {
-          tab.classList.remove('active');
-        }
-      });
+      tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.source === currentSource));
+      const dsEl = $(`${chartType}DataSource`);
+      if (dsEl) dsEl.textContent = DATA_SOURCES[currentSource].name;
     }
 
-    // Carregar dados de uma fonte específica
     function loadSourceData(source, chartType) {
       switch(source) {
-        case 'openmeteo':
-          loadOpenMeteoData(chartType);
-          break;
-        case 'visualcrossing':
-          loadVisualCrossingData(chartType);
-          break;
-        case 'weatherapi':
-          loadWeatherAPIData(chartType);
-          break;
+        case 'openmeteo': loadOpenMeteoData(chartType); break;
+        case 'visualcrossing': loadVisualCrossingData(chartType); break;
+        case 'weatherapi': loadWeatherAPIData(chartType); break;
       }
     }
 
-    // Carregar dados do Open-Meteo
+    // Open-Meteo
     function loadOpenMeteoData(chartType) {
       const url = new URL('https://api.open-meteo.com/v1/forecast');
       url.search = new URLSearchParams({
-        latitude: state.pos.lat,
-        longitude: state.pos.lon,
+        latitude: state.pos.lat, longitude: state.pos.lon,
         daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,apparent_temperature_max,apparent_temperature_min,uv_index_max',
-        timezone: 'America/Sao_Paulo',
-        forecast_days: 16
+        timezone: 'America/Sao_Paulo', forecast_days: 16
       }).toString();
 
       fetch(url)
-        .then(function(res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function(data) {
-          processChartData('openmeteo', chartType, data);
-        })
-        .catch(function(e) {
-          console.warn('[openmeteo] Erro ao carregar dados:', e);
-          createNoDataChart(`chart${chartType.charAt(0).toUpperCase() + chartType.slice(1)}`, 'Erro ao carregar dados do Open-Meteo');
-        });
+        .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+        .then(data => { processChartData('openmeteo', chartType, data); })
+        .catch(e => { console.warn('[openmeteo] Erro:', e); createNoDataChart(`chart${chartType.charAt(0).toUpperCase()+chartType.slice(1)}`, 'Erro ao carregar dados do Open-Meteo'); });
     }
 
-    // Carregar dados do Visual Crossing (simulado)
+    // Visual Crossing (simulado)
     function loadVisualCrossingData(chartType) {
-      // Simular dados com pequenas variações
-      setTimeout(function() {
+      setTimeout(() => {
         if (state.sourceData.openmeteo && state.sourceData.openmeteo[chartType]) {
-          const simulatedData = simulateVisualCrossingData(state.sourceData.openmeteo[chartType]);
-          processChartData('visualcrossing', chartType, simulatedData);
+          const simulated = simulateVisualCrossingData(state.sourceData.openmeteo[chartType]);
+          processChartData('visualcrossing', chartType, simulated);
         } else {
           loadOpenMeteoData(chartType);
         }
       }, 800);
     }
 
-    // Carregar dados do WeatherAPI (simulado)
+    // WeatherAPI (simulado)
     function loadWeatherAPIData(chartType) {
-      // Simular dados com pequenas variações
-      setTimeout(function() {
+      setTimeout(() => {
         if (state.sourceData.openmeteo && state.sourceData.openmeteo[chartType]) {
-          const simulatedData = simulateWeatherAPIData(state.sourceData.openmeteo[chartType]);
-          processChartData('weatherapi', chartType, simulatedData);
+          const simulated = simulateWeatherAPIData(state.sourceData.openmeteo[chartType]);
+          processChartData('weatherapi', chartType, simulated);
         } else {
           loadOpenMeteoData(chartType);
         }
       }, 1200);
     }
 
-    // Simular dados do Visual Crossing
     function simulateVisualCrossingData(openMeteoData) {
       const simulated = JSON.parse(JSON.stringify(openMeteoData));
-      
       if (simulated.daily) {
         const D = simulated.daily;
-        if (D.precipitation_sum) {
-          D.precipitation_sum = D.precipitation_sum.map(val => 
-            val * (0.8 + Math.random() * 0.4)
-          );
-        }
-        
-        if (D.temperature_2m_max) {
-          D.temperature_2m_max = D.temperature_2m_max.map(val => 
-            val + (Math.random() * 3 - 1.5)
-          );
-        }
-        
-        if (D.temperature_2m_min) {
-          D.temperature_2m_min = D.temperature_2m_min.map(val => 
-            val + (Math.random() * 3 - 1.5)
-          );
-        }
+        if (D.precipitation_sum) D.precipitation_sum = D.precipitation_sum.map(v => v * (0.8 + Math.random()*0.4));
+        if (D.temperature_2m_max) D.temperature_2m_max = D.temperature_2m_max.map(v => v + (Math.random()*3 - 1.5));
+        if (D.temperature_2m_min) D.temperature_2m_min = D.temperature_2m_min.map(v => v + (Math.random()*3 - 1.5));
       }
-      
       return simulated;
     }
 
-    // Simular dados do WeatherAPI
     function simulateWeatherAPIData(openMeteoData) {
       const simulated = JSON.parse(JSON.stringify(openMeteoData));
-      
       if (simulated.daily) {
         const D = simulated.daily;
-        if (D.precipitation_sum) {
-          D.precipitation_sum = D.precipitation_sum.map(val => 
-            val * (0.9 + Math.random() * 0.2)
-          );
-        }
-        
-        if (D.temperature_2m_max) {
-          D.temperature_2m_max = D.temperature_2m_max.map(val => 
-            val + (Math.random() * 2 - 1)
-          );
-        }
-        
-        if (D.temperature_2m_min) {
-          D.temperature_2m_min = D.temperature_2m_min.map(val => 
-            val + (Math.random() * 2 - 1)
-          );
-        }
+        if (D.precipitation_sum) D.precipitation_sum = D.precipitation_sum.map(v => v * (0.9 + Math.random()*0.2));
+        if (D.temperature_2m_max) D.temperature_2m_max = D.temperature_2m_max.map(v => v + (Math.random()*2 - 1));
+        if (D.temperature_2m_min) D.temperature_2m_min = D.temperature_2m_min.map(v => v + (Math.random()*2 - 1));
       }
-      
       return simulated;
     }
 
-    // Processar dados para um gráfico específico
     function processChartData(source, chartType, data) {
-      if (!state.sourceData[source]) {
-        state.sourceData[source] = {};
-      }
+      if (!state.sourceData[source]) state.sourceData[source] = {};
       state.sourceData[source][chartType] = data;
-      
-      // Se esta é a fonte ativa para este gráfico, atualizar o gráfico
-      if (state.activeSources[chartType] === source) {
-        createChart(chartType, data, source);
-      }
+      if (state.activeSources[chartType] === source) createChart(chartType, data, source);
     }
 
-    // Criar gráfico com dados
     function createChart(chartType, data, source) {
-      const D = data.daily;
-      const sourceConfig = DATA_SOURCES[source];
-      
+      const D = data.daily; const cfg = DATA_SOURCES[source];
       switch (chartType) {
-        case 'rain':
-          createRainChart(D, sourceConfig);
-          break;
-        case 'temp':
-          createTempChart(D, sourceConfig);
-          break;
-        case 'feel':
-          createFeelChart(D, sourceConfig);
-          break;
-        case 'uv':
-          createUVChart(D, sourceConfig);
-          break;
+        case 'rain': createRainChart(D, cfg); break;
+        case 'temp': createTempChart(D, cfg); break;
+        case 'feel': createFeelChart(D, cfg); break;
+        case 'uv': createUVChart(D, cfg); break;
       }
     }
 
-    // Criar gráfico de chuva
-    function createRainChart(D, sourceConfig) {
-      const labels = [];
-      const precip = [];
-      const pmax = [];
-      let sum15 = 0;
-      
-      for (let d = 0; d < 15 && d < D.time.length; d++) {
-        const dd = new Date(D.time[d]);
-        labels.push(dd.toLocaleDateString('pt-BR', {
-          weekday: 'short',
-          day: '2-digit',
-          month: 'short'
-        }));
-        
-        const mm = (D.precipitation_sum && D.precipitation_sum[d] != null) ? D.precipitation_sum[d] : 0;
-        precip.push(mm);
-        sum15 += mm;
-        
-        pmax.push((D.precipitation_probability_max && D.precipitation_probability_max[d] != null) ? 
-                  D.precipitation_probability_max[d] : 0);
+    function createRainChart(D, cfg) {
+      const labels=[], precip=[], pmax=[]; let sum15=0;
+      for (let d=0; d<15 && d<D.time.length; d++) {
+        const dd=new Date(D.time[d]);
+        labels.push(dd.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}));
+        const mm=(D.precipitation_sum && D.precipitation_sum[d]!=null)?D.precipitation_sum[d]:0; precip.push(mm); sum15+=mm;
+        pmax.push((D.precipitation_probability_max && D.precipitation_probability_max[d]!=null)?D.precipitation_probability_max[d]:0);
       }
-      
       $('sum15').textContent = sum15.toFixed(1) + ' mm';
-      
-      const ctxR = $('chartRain').getContext('2d');
-      if (state.charts.rain) state.charts.rain.destroy();
-      
-      const gradR = ctxR.createLinearGradient(0, 0, 0, 350);
-      gradR.addColorStop(0, sourceConfig.color + 'DD');
-      gradR.addColorStop(1, sourceConfig.color + '40');
-      
-      state.charts.rain = new Chart(ctxR, {
-        type: 'bar',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              type: 'bar',
-              label: 'Chuva (mm/dia)',
-              data: precip,
-              yAxisID: 'y',
-              backgroundColor: gradR,
-              borderColor: sourceConfig.color,
-              borderWidth: 2,
-              borderRadius: 8,
-              maxBarThickness: 32
-            },
-            {
-              type: 'line',
-              label: 'Prob. diária máx. (%)',
-              data: pmax,
-              yAxisID: 'y1',
-              borderColor: '#e74c3c',
-              backgroundColor: 'rgba(231,76,60,.15)',
-              borderWidth: 3,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              tension: 0.3
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            y: {
-              beginAtZero: true,
-              position: 'left',
-              title: { display: true, text: 'mm', font: { size: 14, weight: 'bold' } },
-              grid: { color: 'rgba(2,12,27,.08)' }
-            },
-            y1: {
-              beginAtZero: true,
-              position: 'right',
-              suggestedMax: 100,
-              grid: { drawOnChartArea: false },
-              title: { display: true, text: '%', font: { size: 14, weight: 'bold' } }
-            },
-            x: {
-              grid: { color: 'rgba(2,12,27,.06)' }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                font: { family: 'Inter', size: 13, weight: '600' }
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(255,255,255,.98)',
-              titleColor: '#0f172a',
-              bodyColor: '#0f172a',
-              borderColor: '#d5e1ee',
-              borderWidth: 1,
-              cornerRadius: 8
-            }
-          }
-        }
-      });
+      const ctx=$('chartRain').getContext('2d'); if (state.charts.rain) state.charts.rain.destroy();
+      const grad=ctx.createLinearGradient(0,0,0,350); grad.addColorStop(0, cfg.color+'DD'); grad.addColorStop(1, cfg.color+'40');
+      state.charts.rain=new Chart(ctx,{ type:'bar', data:{ labels, datasets:[
+        { type:'bar', label:'Chuva (mm/dia)', data:precip, yAxisID:'y', backgroundColor:grad, borderColor:cfg.color, borderWidth:2, borderRadius:8, maxBarThickness:32 },
+        { type:'line', label:'Prob. diária máx. (%)', data:pmax, yAxisID:'y1', borderColor:'#e74c3c', backgroundColor:'rgba(231,76,60,.15)', borderWidth:3, pointRadius:4, pointHoverRadius:6, tension:.3 }
+      ]}, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{ y:{ beginAtZero:true, position:'left', title:{display:true,text:'mm',font:{size:14,weight:'bold'}}, grid:{color:'rgba(2,12,27,.08)'} }, y1:{ beginAtZero:true, position:'right', suggestedMax:100, grid:{drawOnChartArea:false}, title:{display:true,text:'%',font:{size:14,weight:'bold'}} }, x:{ grid:{ color:'rgba(2,12,27,.06)'} } }, plugins:{ legend:{ labels:{ font:{ family:'Inter', size:13, weight:'600' } } }, tooltip:{ backgroundColor:'rgba(255,255,255,.98)', titleColor:'#0f172a', bodyColor:'#0f172a', borderColor:'#d5e1ee', borderWidth:1, cornerRadius:8 } } } });
     }
 
-    // Criar gráfico de temperatura
-    function createTempChart(D, sourceConfig) {
-      const labels = [];
-      const tMin = [];
-      const tMax = [];
-      
-      for (let d = 0; d < 15 && d < D.time.length; d++) {
-        const dd = new Date(D.time[d]);
-        labels.push(dd.toLocaleDateString('pt-BR', {
-          weekday: 'short',
-          day: '2-digit',
-          month: 'short'
-        }));
-        
-        tMin.push((D.temperature_2m_min && D.temperature_2m_min[d] != null) ? D.temperature_2m_min[d] : null);
-        tMax.push((D.temperature_2m_max && D.temperature_2m_max[d] != null) ? D.temperature_2m_max[d] : null);
+    function createTempChart(D, cfg) {
+      const labels=[], tMin=[], tMax=[];
+      for (let d=0; d<15 && d<D.time.length; d++) {
+        const dd=new Date(D.time[d]);
+        labels.push(dd.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}));
+        tMin.push((D.temperature_2m_min && D.temperature_2m_min[d]!=null)?D.temperature_2m_min[d]:null);
+        tMax.push((D.temperature_2m_max && D.temperature_2m_max[d]!=null)?D.temperature_2m_max[d]:null);
       }
-      
-      const ctxT = $('chartTemp').getContext('2d');
-      if (state.charts.temp) state.charts.temp.destroy();
-      
-      state.charts.temp = new Chart(ctxT, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [
-            {
-              label: 'Mínima (°C)',
-              data: tMin,
-              yAxisID: 'ty',
-              borderColor: sourceConfig.color,
-              backgroundColor: sourceConfig.color + '25',
-              borderWidth: 3,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              tension: 0.3,
-              fill: false
-            },
-            {
-              label: 'Máxima (°C)',
-              data: tMax,
-              yAxisID: 'ty',
-              borderColor: '#e74c3c',
-              backgroundColor: '#e74c3c25',
-              borderWidth: 3,
-              pointRadius: 4,
-              pointHoverRadius: 6,
-              tension: 0.3,
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          scales: {
-            ty: {
-              beginAtZero: false,
-              title: { display: true, text: '°C', font: { size: 14, weight: 'bold' } },
-              grid: { color: 'rgba(2,12,27,.08)' }
-            },
-            x: {
-              grid: { color: 'rgba(2,12,27,.06)' }
-            }
-          },
-          plugins: {
-            legend: {
-              labels: {
-                font: { family: 'Inter', size: 13, weight: '600' }
-              }
-            },
-            tooltip: {
-              backgroundColor: 'rgba(255,255,255,.98)',
-              titleColor: '#0f172a',
-              bodyColor: '#0f172a',
-              borderColor: '#d5e1ee',
-              borderWidth: 1,
-              cornerRadius: 8
-            }
-          }
-        }
-      });
-      
-      const validMin = tMin.filter(v => v !== null);
-      const validMax = tMax.filter(v => v !== null);
-      if (validMin.length && validMax.length) {
-        $('tempSummary').textContent = 'Variação entre ' + 
-          Math.min(...validMin).toFixed(1) + '°C e ' + 
-          Math.max(...validMax).toFixed(1) + '°C';
-      }
+      const ctx=$('chartTemp').getContext('2d'); if (state.charts.temp) state.charts.temp.destroy();
+      state.charts.temp=new Chart(ctx,{ type:'line', data:{ labels, datasets:[
+        { label:'Mínima (°C)', data:tMin, yAxisID:'ty', borderColor:cfg.color, backgroundColor:cfg.color+'25', borderWidth:3, pointRadius:4, pointHoverRadius:6, tension:.3, fill:false },
+        { label:'Máxima (°C)', data:tMax, yAxisID:'ty', borderColor:'#e74c3c', backgroundColor:'#e74c3c25', borderWidth:3, pointRadius:4, pointHoverRadius:6, tension:.3, fill:false }
+      ]}, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{ ty:{ beginAtZero:false, title:{display:true,text:'°C',font:{size:14,weight:'bold'}}, grid:{color:'rgba(2,12,27,.08)'} }, x:{ grid:{ color:'rgba(2,12,27,.06)'} } }, plugins:{ legend:{ labels:{ font:{ family:'Inter', size:13, weight:'600' } } }, tooltip:{ backgroundColor:'rgba(255,255,255,.98)', titleColor:'#0f172a', bodyColor:'#0f172a', borderColor:'#d5e1ee', borderWidth:1, cornerRadius:8 } } } });
+      const validMin=tMin.filter(v=>v!==null), validMax=tMax.filter(v=>v!==null);
+      if (validMin.length && validMax.length) $('tempSummary').textContent = 'Variação entre ' + Math.min(...validMin).toFixed(1) + '°C e ' + Math.max(...validMax).toFixed(1) + '°C';
     }
 
-    // Criar gráfico de sensação térmica
-    function createFeelChart(D, sourceConfig) {
+    function createFeelChart(D, cfg) {
       if (D.apparent_temperature_min && D.apparent_temperature_max) {
-        const labels = [];
-        const fMin = [];
-        const fMax = [];
-        
-        for (let d = 0; d < 15 && d < D.time.length; d++) {
-          const dd = new Date(D.time[d]);
-          labels.push(dd.toLocaleDateString('pt-BR', {
-            weekday: 'short',
-            day: '2-digit',
-            month: 'short'
-          }));
-          
-          fMin.push((D.apparent_temperature_min && D.apparent_temperature_min[d] != null) ? D.apparent_temperature_min[d] : null);
-          fMax.push((D.apparent_temperature_max && D.apparent_temperature_max[d] != null) ? D.apparent_temperature_max[d] : null);
+        const labels=[], fMin=[], fMax=[];
+        for (let d=0; d<15 && d<D.time.length; d++) {
+          const dd=new Date(D.time[d]);
+          labels.push(dd.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}));
+          fMin.push((D.apparent_temperature_min && D.apparent_temperature_min[d]!=null)?D.apparent_temperature_min[d]:null);
+          fMax.push((D.apparent_temperature_max && D.apparent_temperature_max[d]!=null)?D.apparent_temperature_max[d]:null);
         }
-        
-        const ctxF = $('chartFeel').getContext('2d');
-        if (state.charts.feel) state.charts.feel.destroy();
-        
-        state.charts.feel = new Chart(ctxF, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: 'Sens. Mínima (°C)',
-                data: fMin,
-                yAxisID: 'fy',
-                borderColor: sourceConfig.color,
-                backgroundColor: sourceConfig.color + '25',
-                borderWidth: 3,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.3,
-                fill: false
-              },
-              {
-                label: 'Sens. Máxima (°C)',
-                data: fMax,
-                yAxisID: 'fy',
-                borderColor: '#e74c3c',
-                backgroundColor: '#e74c3c25',
-                borderWidth: 3,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                tension: 0.3,
-                fill: false
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            scales: {
-              fy: {
-                beginAtZero: false,
-                title: { display: true, text: '°C', font: { size: 14, weight: 'bold' } },
-                grid: { color: 'rgba(2,12,27,.08)' }
-              },
-              x: {
-                grid: { color: 'rgba(2,12,27,.06)' }
-              }
-            },
-            plugins: {
-              legend: {
-                labels: {
-                  font: { family: 'Inter', size: 13, weight: '600' }
-                }
-              },
-              tooltip: {
-                backgroundColor: 'rgba(255,255,255,.98)',
-                titleColor: '#0f172a',
-                bodyColor: '#0f172a',
-                borderColor: '#d5e1ee',
-                borderWidth: 1,
-                cornerRadius: 8
-              }
-            }
-          }
-        });
-        
-        const validMin = fMin.filter(v => v !== null);
-        const validMax = fMax.filter(v => v !== null);
-        if (validMin.length && validMax.length) {
-          $('feelSummary').textContent = 'Variação entre ' + 
-            Math.min(...validMin).toFixed(1) + '°C e ' + 
-            Math.max(...validMax).toFixed(1) + '°C';
-        }
+        const ctx=$('chartFeel').getContext('2d'); if (state.charts.feel) state.charts.feel.destroy();
+        state.charts.feel=new Chart(ctx,{ type:'line', data:{ labels, datasets:[
+          { label:'Sens. Mínima (°C)', data:fMin, yAxisID:'fy', borderColor:cfg.color, backgroundColor:cfg.color+'25', borderWidth:3, pointRadius:4, pointHoverRadius:6, tension:.3, fill:false },
+          { label:'Sens. Máxima (°C)', data:fMax, yAxisID:'fy', borderColor:'#e74c3c', backgroundColor:'#e74c3c25', borderWidth:3, pointRadius:4, pointHoverRadius:6, tension:.3, fill:false }
+        ]}, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{ fy:{ beginAtZero:false, title:{display:true,text:'°C',font:{size:14,weight:'bold'}}, grid:{color:'rgba(2,12,27,.08)'} }, x:{ grid:{ color:'rgba(2,12,27,.06)'} } }, plugins:{ legend:{ labels:{ font:{ family:'Inter', size:13, weight:'600' } } }, tooltip:{ backgroundColor:'rgba(255,255,255,.98)', titleColor:'#0f172a', bodyColor:'#0f172a', borderColor:'#d5e1ee', borderWidth:1, cornerRadius:8 } } } });
+        const validMin=fMin.filter(v=>v!==null), validMax=fMax.filter(v=>v!==null);
+        if (validMin.length && validMax.length) $('feelSummary').textContent = 'Variação entre ' + Math.min(...validMin).toFixed(1) + '°C e ' + Math.max(...validMax).toFixed(1) + '°C';
       } else {
         createNoDataChart('chartFeel', 'Dados de sensação térmica não disponíveis');
         $('feelSummary').textContent = 'Dados de sensação térmica não disponíveis';
       }
     }
 
-    // Criar gráfico de UV
-    function createUVChart(D, sourceConfig) {
+    function createUVChart(D, cfg) {
       if (D.uv_index_max) {
-        const labels = [];
-        const uMax = [];
-        
-        for (let d = 0; d < 15 && d < D.time.length; d++) {
-          const dd = new Date(D.time[d]);
-          labels.push(dd.toLocaleDateString('pt-BR', {
-            weekday: 'short',
-            day: '2-digit',
-            month: 'short'
-          }));
-          
-          uMax.push((D.uv_index_max && D.uv_index_max[d] != null) ? D.uv_index_max[d] : 0);
+        const labels=[], uMax=[];
+        for (let d=0; d<15 && d<D.time.length; d++) {
+          const dd=new Date(D.time[d]);
+          labels.push(dd.toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short'}));
+          uMax.push((D.uv_index_max && D.uv_index_max[d]!=null)?D.uv_index_max[d]:0);
         }
-        
-        const ctxU = $('chartUV').getContext('2d');
-        if (state.charts.uv) state.charts.uv.destroy();
-        
-        const gradU = ctxU.createLinearGradient(0, 0, 0, 350);
-        gradU.addColorStop(0, sourceConfig.color + 'DD');
-        gradU.addColorStop(1, sourceConfig.color + '40');
-        
-        state.charts.uv = new Chart(ctxU, {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [
-              {
-                label: 'Índice UV Máx.',
-                data: uMax,
-                yAxisID: 'uy',
-                backgroundColor: gradU,
-                borderColor: sourceConfig.color,
-                borderWidth: 2,
-                borderRadius: 8,
-                maxBarThickness: 32
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'index', intersect: false },
-            scales: {
-              uy: {
-                beginAtZero: true,
-                title: { display: true, text: 'UV', font: { size: 14, weight: 'bold' } },
-                grid: { color: 'rgba(2,12,27,.08)' }
-              },
-              x: {
-                grid: { color: 'rgba(2,12,27,.06)' }
-              }
-            },
-            plugins: {
-              legend: {
-                labels: {
-                  font: { family: 'Inter', size: 13, weight: '600' }
-                }
-              },
-              tooltip: {
-                backgroundColor: 'rgba(255,255,255,.98)',
-                titleColor: '#0f172a',
-                bodyColor: '#0f172a',
-                borderColor: '#d5e1ee',
-                borderWidth: 1,
-                cornerRadius: 8
-              }
-            }
-          }
-        });
-        
-        let peakUV = Math.max(...uMax.filter(v => v !== null));
+        const ctx=$('chartUV').getContext('2d'); if (state.charts.uv) state.charts.uv.destroy();
+        const grad=ctx.createLinearGradient(0,0,0,350); grad.addColorStop(0, cfg.color+'DD'); grad.addColorStop(1, cfg.color+'40');
+        state.charts.uv=new Chart(ctx,{ type:'bar', data:{ labels, datasets:[ { label:'Índice UV Máx.', data:uMax, yAxisID:'uy', backgroundColor:grad, borderColor:cfg.color, borderWidth:2, borderRadius:8, maxBarThickness:32 } ] }, options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false}, scales:{ uy:{ beginAtZero:true, title:{display:true,text:'UV',font:{size:14,weight:'bold'}}, grid:{color:'rgba(2,12,27,.08)'} }, x:{ grid:{ color:'rgba(2,12,27,.06)'} } }, plugins:{ legend:{ labels:{ font:{ family:'Inter', size:13, weight:'600' } } }, tooltip:{ backgroundColor:'rgba(255,255,255,.98)', titleColor:'#0f172a', bodyColor:'#0f172a', borderColor:'#d5e1ee', borderWidth:1, cornerRadius:8 } } } });
+        const peakUV = Math.max(...uMax.filter(v=>v!=null));
         $('uvSummary').textContent = 'Pico máximo: ' + peakUV.toFixed(1);
       } else {
         createNoDataChart('chartUV', 'Dados de UV não disponíveis');
@@ -1348,420 +627,140 @@
       }
     }
 
-    // Configurar gestos de deslizar e cliques
     function setupInteractions() {
-      const chartTypes = ['rain', 'temp', 'feel', 'uv'];
-      
+      const chartTypes=['rain','temp','feel','uv'];
       chartTypes.forEach(chartType => {
         const container = $(`${chartType}ChartContainer`);
-        let startX = 0;
-        let isSwiping = false;
-        
-        // Gestos de toque
-        container.addEventListener('touchstart', function(e) {
-          startX = e.touches[0].clientX;
-          isSwiping = true;
-        });
-        
-        container.addEventListener('touchmove', function(e) {
-          if (!isSwiping) return;
-          
-          const currentX = e.touches[0].clientX;
-          const diff = currentX - startX;
-          
-          if (Math.abs(diff) > 10) {
-            e.preventDefault();
-          }
-        });
-        
-        container.addEventListener('touchend', function(e) {
-          if (!isSwiping) return;
-          
-          const endX = e.changedTouches[0].clientX;
-          const diff = endX - startX;
-          const threshold = 50;
-          
-          if (Math.abs(diff) > threshold) {
-            if (diff > 0) {
-              switchModel(chartType, 'prev');
-            } else {
-              switchModel(chartType, 'next');
-            }
-          }
-          
-          isSwiping = false;
-        });
-        
-        // Cliques nas abas de fonte
         const card = container.closest('.card');
         const sourceTabs = card.querySelectorAll('.source-tab');
         sourceTabs.forEach(tab => {
-          tab.addEventListener('click', function() {
-            const source = this.dataset.source;
-            if (source !== state.activeSources[chartType]) {
-              switchDataSource(chartType, source);
-            }
-          });
-        });
-        
-        // Cliques nos pontos do modelo
-        const dots = container.querySelectorAll('.model-dot');
-        dots.forEach((dot, index) => {
-          dot.addEventListener('click', function() {
-            if (index !== state.activeModels[chartType]) {
-              state.activeModels[chartType] = index;
-              updateModelIndicators(chartType);
-              updateChartWithModelData(chartType);
-            }
+          tab.addEventListener('click', function(){
+            const source=this.dataset.source; if (source!==state.activeSources[chartType]) switchDataSource(chartType, source);
           });
         });
       });
     }
 
-    // Alternar modelo
-    function switchModel(chartType, direction) {
-      const currentModel = state.activeModels[chartType];
-      let newModel;
-      
-      if (direction === 'next') {
-        newModel = (currentModel + 1) % MODELS.length;
-      } else {
-        newModel = (currentModel - 1 + MODELS.length) % MODELS.length;
-      }
-      
-      state.activeModels[chartType] = newModel;
-      updateModelIndicators(chartType);
-      updateChartWithModelData(chartType);
-    }
-
-    // Atualizar indicadores visuais do modelo
-    function updateModelIndicators(chartType) {
-      const currentModel = state.activeModels[chartType];
-      const modelNameElement = $(`${chartType}ModelName`);
-      const dataSourceElement = $(`${chartType}DataSource`);
-      
-      if (modelNameElement) {
-        modelNameElement.textContent = MODELS[currentModel].name;
-      }
-      
-      if (dataSourceElement) {
-        const currentSource = state.activeSources[chartType];
-        dataSourceElement.textContent = `${DATA_SOURCES[currentSource].name} (${MODELS[currentModel].name})`;
-      }
-      
-      // Atualizar pontos do indicador
-      const container = $(`${chartType}ChartContainer`);
-      const dots = container.querySelectorAll('.model-dot');
-      dots.forEach((dot, index) => {
-        if (index === currentModel) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
-      });
-    }
-
-    // Atualizar gráfico com dados do modelo ativo
-    function updateChartWithModelData(chartType) {
-      const currentSource = state.activeSources[chartType];
-      
-      if (!state.sourceData[currentSource] || !state.sourceData[currentSource][chartType]) {
-        loadSourceData(currentSource, chartType);
-        return;
-      }
-      
-      createChart(chartType, state.sourceData[currentSource][chartType], currentSource);
-    }
-
-    // Carregar previsão principal
     function loadForecast() {
       try {
-        const now = Date.now();
-        if (now - state.lastUpdate < 15000) return;
-        state.lastUpdate = now;
-        
+        const now = Date.now(); if (now - state.lastUpdate < 15000) return; state.lastUpdate = now;
         const url = new URL('https://api.open-meteo.com/v1/forecast');
         url.search = new URLSearchParams({
-          latitude: state.pos.lat,
-          longitude: state.pos.lon,
+          latitude: state.pos.lat, longitude: state.pos.lon,
           hourly: 'temperature_2m,relativehumidity_2m,precipitation,precipitation_probability,rain,showers,weathercode,apparent_temperature,uv_index',
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,weathercode,apparent_temperature_max,apparent_temperature_min,uv_index_max',
-          timezone: 'America/Sao_Paulo',
-          forecast_days: 16
+          timezone: 'America/Sao_Paulo', forecast_days: 16
         }).toString();
 
         fetch(url)
-          .then(function(res) {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.json();
-          })
-          .then(function(data) {
-            const H = data.hourly;
-            const D = data.daily;
-            
-            // Encontrar índice do horário atual
-            let idx = 0;
-            for (let i = 0; i < H.time.length; i++) {
-              if (new Date(H.time[i]) >= new Date()) {
-                idx = i;
-                break;
-              }
-            }
-            
-            const end = Math.min(H.time.length, idx + 360);
-            
-            // Atualizar condições atuais
-            const temp = Math.round((H.temperature_2m && H.temperature_2m[idx] != null) ? H.temperature_2m[idx] : 0);
-            const hum = Math.round((H.relativehumidity_2m && H.relativehumidity_2m[idx] != null) ? H.relativehumidity_2m[idx] : 0);
-            const code = (H.weathercode && H.weathercode[idx] != null) ? H.weathercode[idx] : 0;
-            const prob = (H.precipitation_probability && H.precipitation_probability[idx] != null) ? H.precipitation_probability[idx] : 0;
-            const rainHr = ((H.rain && H.rain[idx] != null) ? H.rain[idx] : 0) + 
-                           ((H.showers && H.showers[idx] != null) ? H.showers[idx] : 0);
-            const sumToday = (D.precipitation_sum && D.precipitation_sum[0] != null) ? D.precipitation_sum[0] : null;
+          .then(res => { if (!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+          .then(data => {
+            const H=data.hourly, D=data.daily;
+            let idx=0; for (let i=0;i<H.time.length;i++){ if (new Date(H.time[i]) >= new Date()){ idx=i; break; } }
+            const end=Math.min(H.time.length, idx+360);
+            const temp=Math.round((H.temperature_2m && H.temperature_2m[idx]!=null)?H.temperature_2m[idx]:0);
+            const hum=Math.round((H.relativehumidity_2m && H.relativehumidity_2m[idx]!=null)?H.relativehumidity_2m[idx]:0);
+            const code=(H.weathercode && H.weathercode[idx]!=null)?H.weathercode[idx]:0;
+            const prob=(H.precipitation_probability && H.precipitation_probability[idx]!=null)?H.precipitation_probability[idx]:0;
+            const rainHr=((H.rain && H.rain[idx]!=null)?H.rain[idx]:0)+((H.showers && H.showers[idx]!=null)?H.showers[idx]:0);
+            const sumToday=(D.precipitation_sum && D.precipitation_sum[0]!=null)?D.precipitation_sum[0]:null;
 
-            $('currentTemp').textContent = temp + "°C";
-            $('humidityValue').textContent = hum + "%";
-            $('humidityBar').style.width = hum + "%";
+            $('currentTemp').textContent = temp + '°C';
+            $('humidityValue').textContent = hum + '%';
+            $('humidityBar').style.width = hum + '%';
             $('currentCondition').textContent = getDesc(code);
             $('weatherIcon').textContent = getIcon(code);
             updateBackground(code);
-            $('kProb').textContent = prob + "%";
-            $('kRain').textContent = rainHr.toFixed(1) + " mm";
-            $('kSum').textContent = (sumToday != null ? sumToday.toFixed(1) : '--') + " mm";
+            $('kProb').textContent = prob + '%';
+            $('kRain').textContent = rainHr.toFixed(1) + ' mm';
+            $('kSum').textContent = (sumToday!=null ? sumToday.toFixed(1) : '--') + ' mm';
 
-            // Calcular alerta para as próximas 3 horas
-            let maxProb = 0, sumRain = 0;
-            for (let i = idx; i < Math.min(idx + 3, H.time.length); i++) {
-              const p = (H.precipitation_probability && H.precipitation_probability[i] != null) ? H.precipitation_probability[i] : 0;
-              const r = ((H.rain && H.rain[i] != null) ? H.rain[i] : 0) + 
-                        ((H.showers && H.showers[i] != null) ? H.showers[i] : 0);
-              if (p > maxProb) maxProb = p;
-              sumRain += r;
+            // Alerta 3h
+            let maxProb=0, sumRain=0;
+            for (let i=idx;i<Math.min(idx+3,H.time.length);i++){
+              const p=(H.precipitation_probability && H.precipitation_probability[i]!=null)?H.precipitation_probability[i]:0;
+              const r=((H.rain && H.rain[i]!=null)?H.rain[i]:0)+((H.showers && H.showers[i]!=null)?H.showers[i]:0);
+              if (p>maxProb) maxProb=p; sumRain+=r;
             }
-            
-            let cls = 'ok';
-            let txt = 'Sem sinal relevante de chuva nas próximas horas.';
-            
-            if (maxProb >= 80 && sumRain >= 10) {
-              cls = 'bad';
-              txt = 'Chuva forte provável (3h): prob. ' + maxProb + '%, ~' + sumRain.toFixed(1) + ' mm.';
-            } else if (maxProb >= 60 && sumRain >= 3) {
-              cls = 'warn';
-              txt = 'Chuva moderada possível (3h): prob. ' + maxProb + '%, ~' + sumRain.toFixed(1) + ' mm.';
-            } else if (maxProb >= 30) {
-              cls = 'ok';
-              txt = 'Possibilidade de chuva fraca (prob. ' + maxProb + '%).';
-            }
-            
-            const aEl = $('alertMsg');
-            if (!aEl.classList.contains(cls) || aEl.textContent !== txt) {
-              aEl.className = 'alert ' + cls;
-              aEl.textContent = txt;
-            }
+            let cls='ok', txt='Sem sinal relevante de chuva nas próximas horas.';
+            if (maxProb>=80 && sumRain>=10){ cls='bad'; txt=`Chuva forte provável (3h): prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm.`; }
+            else if (maxProb>=60 && sumRain>=3){ cls='warn'; txt=`Chuva moderada possível (3h): prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm.`; }
+            else if (maxProb>=30){ cls='ok'; txt=`Possibilidade de chuva fraca (prob. ${maxProb}%).`; }
+            const aEl=$('alertMsg'); if (!aEl.classList.contains(cls) || aEl.textContent!==txt){ aEl.className='alert '+cls; aEl.textContent=txt; }
 
-            // Encontrar pico de probabilidade de chuva nos próximos 15 dias
-            let peakIdx = 0;
-            let peakP = (D.precipitation_probability_max && D.precipitation_probability_max[0] != null) ? D.precipitation_probability_max[0] : 0;
-            
-            for (let j = 1; j < Math.min(15, D.time.length); j++) {
-              const pj = (D.precipitation_probability_max && D.precipitation_probability_max[j] != null) ? D.precipitation_probability_max[j] : 0;
-              if (pj > peakP) {
-                peakP = pj;
-                peakIdx = j;
-              }
-            }
-            
-            const pDate = new Date(D.time[peakIdx]);
-            $('peakTime').textContent = pDate.toLocaleDateString('pt-BR', {
-              weekday: 'long',
-              day: 'numeric',
-              month: 'long'
-            });
-            $('peakProb').textContent = 'Probabilidade: ' + peakP + '%';
+            // Pico de prob de chuva (15d)
+            let peakIdx=0; let peakP=(D.precipitation_probability_max && D.precipitation_probability_max[0]!=null)?D.precipitation_probability_max[0]:0;
+            for (let j=1;j<Math.min(15,D.time.length);j++){ const pj=(D.precipitation_probability_max && D.precipitation_probability_max[j]!=null)?D.precipitation_probability_max[j]:0; if (pj>peakP){ peakP=pj; peakIdx=j; } }
+            const pDate=new Date(D.time[peakIdx]);
+            $('peakTime').textContent=pDate.toLocaleDateString('pt-BR',{ weekday:'long', day:'numeric', month:'long' });
+            $('peakProb').textContent='Probabilidade: '+peakP+'%';
 
-            // Processar dados para gráficos
-            processChartData('openmeteo', 'rain', data);
-            processChartData('openmeteo', 'temp', data);
-            processChartData('openmeteo', 'feel', data);
-            processChartData('openmeteo', 'uv', data);
+            // Gráficos (fonte padrão)
+            processChartData('openmeteo','rain',data);
+            processChartData('openmeteo','temp',data);
+            processChartData('openmeteo','feel',data);
+            processChartData('openmeteo','uv',data);
 
-            // Encontrar extremos de temperatura
-            let cold = { t: +Infinity, time: null };
-            let hot = { t: -Infinity, time: null };
-            
-            for (let hh = idx; hh < end; hh++) {
-              const th = (H.temperature_2m && H.temperature_2m[hh] != null) ? H.temperature_2m[hh] : null;
-              if (th == null) continue;
-              
-              if (th < cold.t) {
-                cold.t = th;
-                cold.time = H.time[hh];
-              }
-              
-              if (th > hot.t) {
-                hot.t = th;
-                hot.time = H.time[hh];
-              }
+            // Outras fontes (simuladas)
+            setTimeout(()=>loadSourceData('visualcrossing','rain'),1000);
+            setTimeout(()=>loadSourceData('weatherapi','rain'),2000);
+            setTimeout(()=>loadSourceData('visualcrossing','temp'),1500);
+            setTimeout(()=>loadSourceData('weatherapi','temp'),2500);
+
+            // Extremos
+            let cold={t:+Infinity,time:null}, hot={t:-Infinity,time:null};
+            for (let hh=idx; hh<Math.min(end,H.time.length); hh++){
+              const th=(H.temperature_2m && H.temperature_2m[hh]!=null)?H.temperature_2m[hh]:null; if (th==null) continue;
+              if (th<cold.t){ cold.t=th; cold.time=H.time[hh]; }
+              if (th>hot.t){ hot.t=th; hot.time=H.time[hh]; }
             }
-            
-            // Encontrar temperatura mínima na previsão
-            let minTemp = { t: +Infinity, time: null };
-            for (let td = 0; td < 15 && td < D.time.length; td++) {
-              const tMinVal = (D.temperature_2m_min && D.temperature_2m_min[td] != null) ? D.temperature_2m_min[td] : null;
-              if (tMinVal !== null && tMinVal < minTemp.t) {
-                minTemp.t = tMinVal;
-                minTemp.time = D.time[td];
-              }
+            let minTemp={t:+Infinity,time:null};
+            for (let td=0; td<15 && td<D.time.length; td++){
+              const tMinVal=(D.temperature_2m_min && D.temperature_2m_min[td]!=null)?D.temperature_2m_min[td]:null;
+              if (tMinVal!==null && tMinVal<minTemp.t){ minTemp.t=tMinVal; minTemp.time=D.time[td]; }
             }
-            
-            let coldStr = '--';
-            let hotStr = '--';
-            let minTempStr = '--';
-            
-            if (cold.time) {
-              const cd = new Date(cold.time);
-              coldStr = cd.toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long'
-              }) + ' às ' + cd.toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) + ' • ' + cold.t.toFixed(1) + '°C';
-            }
-            
-            if (hot.time) {
-              const hd = new Date(hot.time);
-              hotStr = hd.toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long'
-              }) + ' às ' + hd.toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              }) + ' • ' + hot.t.toFixed(1) + '°C';
-            }
-            
-            if (minTemp.time) {
-              const md = new Date(minTemp.time);
-              minTempStr = md.toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                day: '2-digit',
-                month: 'long'
-              }) + ' • ' + minTemp.t.toFixed(1) + '°C';
-            }
-            
+            let coldStr='--', hotStr='--', minTempStr='--';
+            if (cold.time){ const cd=new Date(cold.time); coldStr = cd.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) + ' às ' + cd.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' • ' + cold.t.toFixed(1) + '°C'; }
+            if (hot.time){ const hd=new Date(hot.time); hotStr = hd.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) + ' às ' + hd.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ' • ' + hot.t.toFixed(1) + '°C'; }
+            if (minTemp.time){ const md=new Date(minTemp.time); minTempStr = md.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) + ' • ' + minTemp.t.toFixed(1) + '°C'; }
             $('extremesTemp').textContent = 'Mais frio: ' + coldStr + ' • Mais quente: ' + hotStr;
             $('extremesMin').textContent = 'Mínima mais baixa: ' + minTempStr;
             $('sourcesComparison').textContent = 'Consenso entre fontes: Dados integrados de múltiplas APIs meteorológicas';
-
-            // Carregar dados de outras fontes
-            setTimeout(() => loadSourceData('visualcrossing', 'rain'), 1000);
-            setTimeout(() => loadSourceData('weatherapi', 'rain'), 2000);
-            setTimeout(() => loadSourceData('visualcrossing', 'temp'), 1500);
-            setTimeout(() => loadSourceData('weatherapi', 'temp'), 2500);
-
           })
-          .catch(function(e) {
-            const aEl = $('alertMsg');
-            aEl.className = 'alert warn';
-            aEl.textContent = 'Erro ao carregar previsão. Nova tentativa em 30s.';
-            console.warn('[forecast]', e);
-          });
+          .catch(e => { const aEl=$('alertMsg'); aEl.className='alert warn'; aEl.textContent='Erro ao carregar previsão. Nova tentativa em 30s.'; console.warn('[forecast]', e); });
       } catch(e) {
-        const aEl = $('alertMsg');
-        aEl.className = 'alert warn';
-        aEl.textContent = 'Erro ao carregar previsão. Nova tentativa em 30s.';
-        console.warn('[forecast]', e);
+        const aEl=$('alertMsg'); aEl.className='alert warn'; aEl.textContent='Erro ao carregar previsão. Nova tentativa em 30s.'; console.warn('[forecast]', e);
       }
     }
 
-    function setPos(lat, lon) {
-      state.pos = { lat: lat, lon: lon };
-      resolveAddress(lat, lon);
-      loadForecast();
-    }
+    function setPos(lat, lon) { state.pos = { lat, lon }; resolveAddress(lat, lon); loadForecast(); }
 
     function startGPS() {
-      if (!navigator.geolocation) {
-        gpsStatus.textContent = 'Sem geolocalização';
-        gpsDot.className = 'gps-dot error';
-        setPos(-22.86, -43.28);
-        return;
-      }
-      
-      gpsStatus.textContent = 'Buscando…';
-      gpsDot.className = 'gps-dot searching';
-      
+      if (!navigator.geolocation) { gpsStatus.textContent='Sem geolocalização'; gpsDot.className='gps-dot error'; setPos(-22.86, -43.28); return; }
+      gpsStatus.textContent='Buscando…'; gpsDot.className='gps-dot searching';
       navigator.geolocation.getCurrentPosition(
-        function(pos) {
-          const c = pos.coords;
-          gpsStatus.textContent = 'Localização ativa';
-          gpsDot.className = 'gps-dot';
-          setPos(c.latitude, c.longitude);
-        },
-        function() {
-          gpsStatus.textContent = 'Padrão: Zona Norte RJ';
-          gpsDot.className = 'gps-dot searching';
-          setPos(-22.86, -43.28);
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+        pos => { const c=pos.coords; gpsStatus.textContent='Localização ativa'; gpsDot.className='gps-dot'; setPos(c.latitude, c.longitude); },
+        () => { gpsStatus.textContent='Padrão: Zona Norte RJ'; gpsDot.className='gps-dot searching'; setPos(-22.86, -43.28); },
+        { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
       );
-      
-      // Observar mudanças de posição
-      const R = 6371000;
-      let base = null;
-      
-      function dist(a, b) {
-        const d2r = Math.PI / 180;
-        const dLat = (b.lat - a.lat) * d2r;
-        const dLon = (b.lon - a.lon) * d2r;
-        const la = a.lat * d2r;
-        const lb = b.lat * d2r;
-        
-        const s = Math.pow(Math.sin(dLat / 2), 2) + 
-                  Math.cos(la) * Math.cos(lb) * Math.pow(Math.sin(dLon / 2), 2);
-        return 2 * R * Math.asin(Math.sqrt(s));
-      }
-      
+      const R=6371000; let base=null;
+      function dist(a,b){ const d2r=Math.PI/180; const dLat=(b.lat-a.lat)*d2r; const dLon=(b.lon-a.lon)*d2r; const la=a.lat*d2r; const lb=b.lat*d2r; const s=Math.pow(Math.sin(dLat/2),2)+Math.cos(la)*Math.cos(lb)*Math.pow(Math.sin(dLon/2),2); return 2*R*Math.asin(Math.sqrt(s)); }
       state.watchId = navigator.geolocation.watchPosition(
-        function(p) {
-          const n = { lat: p.coords.latitude, lon: p.coords.longitude };
-          if (!base) base = n;
-          
-          if (dist(base, n) > 250) {
-            base = n;
-            setPos(n.lat, n.lon);
-          }
-        },
-        function() {},
-        { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 }
+        p => { const n={ lat:p.coords.latitude, lon:p.coords.longitude }; if (!base) base=n; if (dist(base,n)>250){ base=n; setPos(n.lat,n.lon); } },
+        () => {},
+        { enableHighAccuracy:false, timeout:30000, maximumAge:300000 }
       );
     }
 
-    // Botão Zona Norte RJ
-    $('btnZN').addEventListener('click', function() {
-      setPos(-22.86, -43.28);
-      gpsStatus.textContent = 'Zona Norte RJ';
-      gpsDot.className = 'gps-dot';
-    });
+    $('btnZN').addEventListener('click', function(){ setPos(-22.86,-43.28); gpsStatus.textContent='Zona Norte RJ'; gpsDot.className='gps-dot'; });
 
-    // Inicialização
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function(){
       setupInteractions();
       startGPS();
-      
-      // Atualizar previsão a cada 5 minutos
       setInterval(loadForecast, 300000);
     });
 
-    // Cleanup ao sair
-    window.addEventListener('beforeunload', function() {
-      if (state.watchId) {
-        navigator.geolocation.clearWatch(state.watchId);
-      }
-    });
+    window.addEventListener('beforeunload', function(){ if (state.watchId) navigator.geolocation.clearWatch(state.watchId); });
   </script>
 </body>
 </html>
-
