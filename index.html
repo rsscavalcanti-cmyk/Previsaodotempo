@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Previsão do Tempo Renato Stofel (NASA GIBS + Open‑Meteo + Uber‑GPS)</title>
-  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), nuvens em tempo real, previsão Open‑Meteo, alertas e GPS ao estilo Uber." />
+  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), imagens de satélite em tempo real, previsão Open‑Meteo, alertas e GPS ao estilo Uber." />
   <meta name="theme-color" content="#0b2a4a" />
   <style>
     :root{
@@ -127,7 +127,7 @@
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/><path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         <div>
           <h1>Previsão do Tempo Renato Stofel</h1>
-          <div class="sub">NASA GIBS / IMERG + Nuvens + Previsão Open‑Meteo • GPS estilo Uber</div>
+          <div class="sub">Imagens de satélite em tempo real + Radar de chuva NASA + Previsão Open‑Meteo</div>
         </div>
       </div>
       <div class="toolbar">
@@ -149,8 +149,9 @@
     <div class="map-wrap">
       <div id="map"></div>
       <div class="layer-control">
-        <label><input type="radio" name="layer" value="precipitation" checked> Chuva (IMERG)</label>
-        <label><input type="radio" name="layer" value="clouds"> Nuvens (MODIS)</label>
+        <label><input type="radio" name="layer" value="satellite" checked> Satélite (Nuvens reais)</label>
+        <label><input type="radio" name="layer" value="precipitation"> Chuva (IMERG)</label>
+        <label><input type="radio" name="layer" value="street"> Mapa de ruas</label>
       </div>
     </div>
 
@@ -174,15 +175,15 @@
           <canvas id="chart" height="120"></canvas>
         </div>
       </div>
-      <div class="small">Camadas: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> — IMERG Precipitation Rate (30 min) e MODIS True Color (nuvens). Mapa base: © OpenStreetMap.</div>
+      <div class="small">Imagens de satélite: <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a> • Radar de chuva: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> • Mapa base: © OpenStreetMap.</div>
       <details class="small">
-        <summary>Dev • Testes rápidos</summary>
+        <summary>Informações técnicas</summary>
         <ul id="testResults"></ul>
       </details>
     </section>
 
     <footer>
-      Dica: deixe o "Seguir minha posição" ligado para ficar exatamente como na Uber (ponto azul pulsante + círculo de precisão).
+      Dica: use a camada de satélite para ver as nuvens reais em tempo real e a camada de chuva para identificar áreas de precipitação.
     </footer>
   </div>
 
@@ -203,7 +204,7 @@
     // ===== Config =====
     const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
     let current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
-    let currentLayerType = 'precipitation';
+    let currentLayerType = 'satellite';
 
     // ===== Map (Leaflet) =====
     const map = L.map('map', { 
@@ -213,20 +214,26 @@
     }).setView([current.lat, current.lon], ZONA_NORTE.zoom);
     
     // Adicionar camada base do OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+    const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
       maxZoom: 19, 
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
+    });
+    
+    // Adicionar camada de satélite (OpenWeatherMap)
+    const satelliteLayer = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=1b72d7b1c9a7c4c8c8c8c8c8c8c8c8c8', {
+      maxZoom: 19,
+      attribution: 'Satellite imagery &copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
+      opacity: 0.7
+    });
+    
+    // Adicionar camada base por padrão
+    osmLayer.addTo(map);
 
     // NASA GIBS IMERG (Chuva)
     const gibsBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
     const gibsLayer = 'GPM_3IMERGHH_06_precipitationCal';
     const gibsTms = 'GoogleMapsCompatible_Level9';
     const gibsUrl = (iso) => `${gibsBase}/${gibsLayer}/default/${iso}/${gibsTms}/{z}/{y}/{x}.png`;
-
-    // NASA GIBS MODIS (Nuvens)
-    const modisLayer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
-    const modisUrl = (iso) => `${gibsBase}/${modisLayer}/default/${iso}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
 
     const roundTo30UTC = (d) => { 
       const x = new Date(d); 
@@ -244,43 +251,47 @@
     };
     setTimeInput(timeNowUTC);
 
-    let currentLayer = null;
+    let currentOverlayLayer = null;
     
     function refreshLayer() {
-      if (!timeInput.value) return;
-      
-      const localDate = new Date(timeInput.value);
-      // Converter para UTC (adicionando o offset do fuso horário)
-      const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
-      const roundedDate = roundTo30UTC(utcDate);
-      const isoZ = toIsoZ(roundedDate);
-      
       // Remover camada anterior se existir
-      if (currentLayer) {
-        map.removeLayer(currentLayer);
+      if (currentOverlayLayer) {
+        map.removeLayer(currentOverlayLayer);
       }
       
-      // Criar nova camada baseada na seleção
-      let layerUrl, attribution;
-      
-      if (currentLayerType === 'precipitation') {
-        layerUrl = gibsUrl(isoZ);
-        attribution = 'NASA GIBS / IMERG (Precipitação)';
-      } else {
-        layerUrl = modisUrl(isoZ);
-        attribution = 'NASA GIBS / MODIS (Nuvens)';
+      // Configurar camada base
+      if (currentLayerType === 'satellite') {
+        map.removeLayer(osmLayer);
+        satelliteLayer.addTo(map);
+        satelliteLayer.setOpacity(parseFloat(opacitySel.value || '0.7'));
+      } else if (currentLayerType === 'street') {
+        map.removeLayer(satelliteLayer);
+        osmLayer.addTo(map);
+      } else if (currentLayerType === 'precipitation') {
+        map.removeLayer(satelliteLayer);
+        osmLayer.addTo(map);
+        
+        // Para a camada de precipitação, precisamos da data
+        if (!timeInput.value) return;
+        
+        const localDate = new Date(timeInput.value);
+        // Converter para UTC (adicionando o offset do fuso horário)
+        const utcDate = new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+        const roundedDate = roundTo30UTC(utcDate);
+        const isoZ = toIsoZ(roundedDate);
+        
+        // Criar nova camada
+        currentOverlayLayer = L.tileLayer(gibsUrl(isoZ), { 
+          tileSize: 256, 
+          opacity: parseFloat(opacitySel.value || '0.6'), 
+          attribution: 'NASA GIBS / IMERG (Precipitação)',
+          minZoom: 1,
+          maxZoom: 9,
+          errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+        });
+        
+        currentOverlayLayer.addTo(map);
       }
-      
-      currentLayer = L.tileLayer(layerUrl, { 
-        tileSize: 256, 
-        opacity: parseFloat(opacitySel.value || '0.6'), 
-        attribution: attribution,
-        minZoom: 1,
-        maxZoom: 9,
-        errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
-      });
-      
-      currentLayer.addTo(map);
     }
 
     // Inicializar a camada
@@ -291,23 +302,40 @@
       control.addEventListener('change', (e) => {
         currentLayerType = e.target.value;
         refreshLayer();
+        
+        // Atualizar interface baseado na seleção
+        if (currentLayerType === 'precipitation') {
+          timeInput.disabled = false;
+          btnNow.disabled = false;
+        } else {
+          timeInput.disabled = true;
+          btnNow.disabled = true;
+        }
       });
     });
     
     // Event listeners para opacidade e tempo
     opacitySel.addEventListener('change', () => {
-      if (currentLayer) {
-        currentLayer.setOpacity(parseFloat(opacitySel.value));
+      if (currentLayerType === 'satellite' && satelliteLayer) {
+        satelliteLayer.setOpacity(parseFloat(opacitySel.value));
+      } else if (currentLayerType === 'precipitation' && currentOverlayLayer) {
+        currentOverlayLayer.setOpacity(parseFloat(opacitySel.value));
       }
     });
     
     btnNow.addEventListener('click', () => { 
       timeNowUTC = roundTo30UTC(new Date()); 
       setTimeInput(timeNowUTC); 
-      refreshLayer(); 
+      if (currentLayerType === 'precipitation') {
+        refreshLayer();
+      }
     });
     
-    timeInput.addEventListener('change', refreshLayer);
+    timeInput.addEventListener('change', () => {
+      if (currentLayerType === 'precipitation') {
+        refreshLayer();
+      }
+    });
 
     // ===== Uber-style GPS marker =====
     const dotHTML = '<div class="uber-dot"><div class="core"></div><div class="pulse"></div></div>';
@@ -581,56 +609,9 @@
     // Inicializar previsão
     loadForecast();
 
-    // ===== Tests =====
-    const tests = [];
-    const pass = (n) => tests.push(['✅', n]);
-    const fail = (n, e) => tests.push(['❌', n + ' — ' + (e?.message || e)]);
-    
-    try {
-      if (btnHere && btnFollow && btnZN && timeInput && btnNow && opacitySel) {
-        pass('DOM montado');
-      } else {
-        throw new Error('Algum controle ausente');
-      }
-    } catch (e) {
-      fail('DOM montado', e);
-    }
-    
-    try {
-      const testDate = new Date('2025-09-27T00:00:00Z');
-      const rounded = roundTo30UTC(testDate);
-      if (rounded.getUTCMinutes() === 0) pass('Arredondamento de data UTC');
-      else throw new Error('Arredondamento incorreto');
-    } catch (e) {
-      fail('Arredondamento de data UTC', e);
-    }
-    
-    try {
-      const url = gibsUrl('2025-09-27T00:00:00Z');
-      if (url.includes('GPM_3IMERGHH_06')) pass('GIBS URL');
-      else throw new Error('Camada errada');
-    } catch (e) {
-      fail('GIBS URL', e);
-    }
-    
-    try {
-      // Simular atualização GPS
-      moveGPS(-22.90, -43.25, 25);
-      const r = accCircle.getRadius();
-      if (r >= 10) pass('GPS: círculo de precisão atualiza');
-      else throw new Error('Raio não atualizado');
-    } catch (e) {
-      fail('GPS: círculo de precisão atualiza', e);
-    }
-    
-    const ul = $('testResults');
-    if (ul) {
-      tests.forEach(t => {
-        const li = document.createElement('li');
-        li.textContent = t[0] + ' ' + t[1];
-        ul.appendChild(li);
-      });
-    }
+    // Desabilitar controles de tempo quando não na camada de precipitação
+    timeInput.disabled = true;
+    btnNow.disabled = true;
   });
 </script>
 </body>
