@@ -17,10 +17,11 @@
          color:var(--ink); background:var(--bg); transition: background 1.5s ease}
     
     /* Backgrounds dinâmicos baseados no tempo */
-    body.sunny{background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)}
-    body.cloudy{background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%)}
-    body.rainy{background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%)}
+    body.sunny{background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%)}
+    body.cloudy{background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%)}
+    body.rainy{background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%)}
     body.night{background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)}
+    body.stormy{background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)}
     
     .app{display:grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; min-height:100vh}
     
@@ -163,6 +164,37 @@
       transition: width 0.5s ease;
     }
     
+    /* Weather icon */
+    .weather-icon {
+      font-size: 24px;
+      margin-right: 5px;
+    }
+    
+    /* GPS Status */
+    .gps-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .gps-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--ok);
+      animation: pulse 2s infinite;
+    }
+    
+    .gps-dot.searching {
+      background-color: var(--warn);
+    }
+    
+    .gps-dot.error {
+      background-color: var(--bad);
+    }
+    
     /* Responsive improvements for mobile */
     @media (max-width:768px){
       .app{grid-template-rows: auto 1fr auto}
@@ -213,9 +245,10 @@
         </div>
       </div>
       <div class="toolbar">
-        <button id="btnHere">📍 Minha localização</button>
-        <button id="btnFollow">📡 Seguir GPS: OFF</button>
-        <span id="gpsStatus" class="small"></span>
+        <div class="gps-indicator">
+          <div class="gps-dot searching" id="gpsDot"></div>
+          <span id="gpsStatus">Buscando localização...</span>
+        </div>
         <button id="btnZN">🗺️ Zona Norte RJ</button>
         <label class="small">Data/hora (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
         <button id="btnNow">🔄 Agora</button>
@@ -241,6 +274,7 @@
         <div class="card">
           <h3>🌡️ Condições Atuais</h3>
           <div class="current-conditions">
+            <span class="weather-icon" id="weatherIcon">☀️</span>
             <div class="temp" id="currentTemp">--°C</div>
             <div class="condition" id="currentCondition">Carregando...</div>
           </div>
@@ -275,7 +309,7 @@
     </section>
 
     <footer>
-      Atualizado automaticamente • Use o modo "Seguir GPS" para acompanhar sua localização em tempo real
+      Atualizado automaticamente • GPS sempre ativo para acompanhar sua localização em tempo real
     </footer>
   </div>
 
@@ -283,9 +317,8 @@
   window.addEventListener('DOMContentLoaded', () => {
     // ===== Utils =====
     const $ = (id) => document.getElementById(id);
-    const btnHere = $('btnHere');
-    const btnFollow = $('btnFollow');
     const gpsStatus = $('gpsStatus');
+    const gpsDot = $('gpsDot');
     const btnZN = $('btnZN');
     const timeInput = $('timeIso');
     const btnNow = $('btnNow');
@@ -296,11 +329,13 @@
     const currentCondition = $('currentCondition');
     const humidityValue = $('humidityValue');
     const humidityBar = $('humidityBar');
+    const weatherIcon = $('weatherIcon');
 
     // ===== Config =====
     const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
     let current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
     let currentLayerType = 'satellite';
+    let watchId = null;
 
     // ===== Map (Leaflet) =====
     const map = L.map('map', { 
@@ -315,10 +350,13 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
     
-    // Camada de satélite da NASA GIBS (MODIS True Color)
+    // Camada de satélite da NASA GIBS (MODIS True Color) - Corrigida para nuvens
     const nasaBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
     const nasaLayer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
-    const nasaTime = new Date().toISOString().split('T')[0]; // Data atual
+    // Obter a data atual para a camada
+    const today = new Date();
+    const nasaTime = today.toISOString().split('T')[0]; // Data atual
+    
     const nasaUrl = `${nasaBase}/${nasaLayer}/default/${nasaTime}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
     
     const satelliteLayer = L.tileLayer(nasaUrl, {
@@ -470,7 +508,7 @@
     }
 
     // ===== Função para atualizar o fundo baseado nas condições =====
-    function updateBackground(weatherCode, isDay) {
+    function updateBackground(weatherCode) {
       const body = document.body;
       body.className = ''; // Remove todas as classes anteriores
       
@@ -498,10 +536,49 @@
       } else if (weatherCode >= 61 || weatherCode >= 80) {
         // Chuva ou pancadas de chuva
         body.classList.add('rainy');
+      } else if (weatherCode >= 95) {
+        // Tempestade
+        body.classList.add('stormy');
       } else {
         // Padrão (nublado)
         body.classList.add('cloudy');
       }
+    }
+
+    // ===== Função para obter ícone baseado no código meteorológico =====
+    function getWeatherIcon(code) {
+      const weatherIcons = {
+        0: '☀️', // Céu limpo
+        1: '🌤️', // Principalmente limpo
+        2: '⛅', // Parcialmente nublado
+        3: '☁️', // Nublado
+        45: '🌫️', // Nevoeiro
+        48: '🌫️', // Nevoeiro com geada
+        51: '🌦️', // Chuvisco leve
+        53: '🌦️', // Chuvisco moderado
+        55: '🌦️', // Chuvisco denso
+        56: '🌧️', // Chuvisco congelante leve
+        57: '🌧️', // Chuvisco congelante denso
+        61: '🌧️', // Chuva leve
+        63: '🌧️', // Chuva moderada
+        65: '⛈️', // Chuva forte
+        66: '🌧️', // Chuva congelante leve
+        67: '🌧️', // Chuva congelante forte
+        71: '🌨️', // Queda de neve leve
+        73: '🌨️', // Queda de neve moderada
+        75: '🌨️', // Queda de neve forte
+        77: '🌨️', // Grãos de neve
+        80: '🌦️', // Pancadas de chuva leves
+        81: '⛈️', // Pancadas de chuva moderadas
+        82: '⛈️', // Pancadas de chuva violentas
+        85: '🌨️', // Pancadas de neve leves
+        86: '🌨️', // Pancadas de neve fortes
+        95: '⛈️', // Trovoada
+        96: '⛈️', // Trovoada com granizo leve
+        99: '⛈️'  // Trovoada com granizo forte
+      };
+      
+      return weatherIcons[code] || '🌤️';
     }
 
     // ===== Forecast (Open‑Meteo) =====
@@ -554,8 +631,11 @@
         humidityValue.textContent = `${Math.round(humidity)}%`;
         humidityBar.style.width = `${humidity}%`;
         
+        // Atualizar o ícone do tempo
+        weatherIcon.textContent = getWeatherIcon(weatherCode);
+        
         // Atualizar o fundo baseado nas condições
-        updateBackground(weatherCode, true);
+        updateBackground(weatherCode);
         
         const prob = H.precipitation_probability?.[nowIdx] ?? 0;
         const rain = (H.rain?.[nowIdx] ?? 0) + (H.showers?.[nowIdx] ?? 0);
@@ -678,6 +758,7 @@
         currentCondition.textContent = 'Dados indisponíveis';
         humidityValue.textContent = '--%';
         humidityBar.style.width = '0%';
+        weatherIcon.textContent = '❓';
         
         // Tentar novamente após 30 segundos
         setTimeout(loadForecast, 30000);
@@ -720,6 +801,54 @@
       return weatherCodes[code] || 'Condições desconhecidas';
     }
 
+    // ===== GPS Automático =====
+    function startGPS() {
+      if (!navigator.geolocation) {
+        gpsStatus.textContent = 'Geolocalização não suportada';
+        gpsDot.className = 'gps-dot error';
+        return;
+      }
+      
+      gpsStatus.textContent = 'Buscando localização...';
+      gpsDot.className = 'gps-dot searching';
+      
+      // Primeiro, tentar obter a localização atual
+      navigator.geolocation.getCurrentPosition(
+        position => {
+          const { latitude, longitude, accuracy } = position.coords;
+          moveGPS(latitude, longitude, accuracy);
+          map.setView([latitude, longitude], 15);
+          gpsStatus.textContent = 'Localização ativa';
+          gpsDot.className = 'gps-dot';
+          loadForecast();
+        },
+        error => {
+          gpsStatus.textContent = 'Erro ao obter localização';
+          gpsDot.className = 'gps-dot error';
+          console.warn('GPS error:', error);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+      
+      // Iniciar monitoramento contínuo
+      watchId = navigator.geolocation.watchPosition(
+        position => {
+          const { latitude, longitude, accuracy } = position.coords;
+          moveGPS(latitude, longitude, accuracy);
+          map.setView([latitude, longitude], Math.max(map.getZoom(), 15), { animate: false });
+          gpsStatus.textContent = 'Localização ativa';
+          gpsDot.className = 'gps-dot';
+          loadForecast();
+        },
+        error => {
+          gpsStatus.textContent = 'GPS indisponível';
+          gpsDot.className = 'gps-dot error';
+          console.warn('GPS error:', error);
+        },
+        { enableHighAccuracy: true, maximumAge: 8000, timeout: 15000 }
+      );
+    }
+
     // ===== Controls =====
     btnZN.addEventListener('click', () => {
       map.setView([ZONA_NORTE.lat, ZONA_NORTE.lon], ZONA_NORTE.zoom);
@@ -727,83 +856,9 @@
       moveGPS(current.lat, current.lon, 40);
       loadForecast();
     });
-    
-    btnHere.addEventListener('click', () => {
-      if (!navigator.geolocation) {
-        alert('Geolocalização não suportada.');
-        return;
-      }
-      
-      navigator.geolocation.getCurrentPosition(
-        p => {
-          const { latitude, longitude, accuracy } = p.coords;
-          moveGPS(latitude, longitude, accuracy);
-          map.setView([latitude, longitude], 15);
-          loadForecast();
-        },
-        () => {
-          alert('Não foi possível obter sua localização.');
-          gpsStatus.textContent = 'Erro ao obter localização';
-        }
-      );
-    });
 
-    let following = false;
-    let watchId = null;
-    let lastUpdate = 0;
-    
-    function startFollow() {
-      if (!navigator.geolocation) {
-        alert('Geolocalização não suportada.');
-        return;
-      }
-      
-      if (watchId !== null) return;
-      
-      following = true;
-      btnFollow.textContent = '📡 Seguir GPS: ON';
-      btnFollow.classList.add('on');
-      gpsStatus.textContent = 'Ativo';
-      
-      watchId = navigator.geolocation.watchPosition(
-        p => {
-          const { latitude, longitude, accuracy } = p.coords;
-          moveGPS(latitude, longitude, accuracy);
-          
-          const now = Date.now();
-          if (now - lastUpdate > 1000) {
-            map.setView([latitude, longitude], Math.max(map.getZoom(), 15), { animate: false });
-            lastUpdate = now;
-          }
-          
-          loadForecast();
-        },
-        e => {
-          gpsStatus.textContent = 'GPS indisponível';
-          console.warn('GPS error:', e);
-        },
-        { enableHighAccuracy: true, maximumAge: 8000, timeout: 15000 }
-      );
-    }
-    
-    function stopFollow() {
-      following = false;
-      btnFollow.textContent = '📡 Seguir GPS: OFF';
-      btnFollow.classList.remove('on');
-      gpsStatus.textContent = '';
-      
-      if (watchId !== null) {
-        navigator.geolocation.clearWatch(watchId);
-        watchId = null;
-      }
-    }
-    
-    btnFollow.addEventListener('click', () => {
-      following ? stopFollow() : startFollow();
-    });
-
-    // Inicializar previsão
-    loadForecast();
+    // Inicializar GPS automaticamente
+    startGPS();
     
     // Atualizar previsão a cada 10 minutos
     setInterval(loadForecast, 600000);
