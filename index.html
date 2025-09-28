@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Chuva Agora — Zona Norte RJ (NASA GIBS + Open‑Meteo + Uber‑GPS)</title>
-  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), previsão Open‑Meteo, alertas e GPS ao estilo Uber (ponto pulsante + círculo de precisão)." />
+  <title>Previsão do Tempo Renato Stofel (NASA GIBS + Open‑Meteo + Uber‑GPS)</title>
+  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), nuvens em tempo real, previsão Open‑Meteo, alertas e GPS ao estilo Uber." />
   <meta name="theme-color" content="#0b2a4a" />
   <style>
     :root{
@@ -20,7 +20,7 @@
     header .title{display:flex; gap:10px; align-items:center}
     header h1{font-size:16px; margin:0; font-weight:700}
     header .sub{font-size:12px; color:var(--muted)}
-    .map-wrap{position:relative; height:56vh}
+    .map-wrap{position:relative; height:60vh}
     #map{position:absolute; inset:0}
     .panel{display:grid; gap:10px; padding:10px; background:linear-gradient(180deg, #0f172a, #0b1220)}
     .cards{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px}
@@ -62,11 +62,58 @@
     .loading{display:inline-block; width:16px; height:16px; border:2px solid transparent; border-top:2px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 
-    /* Responsive improvements */
+    /* Responsive improvements for mobile */
     @media (max-width:768px){
+      .app{grid-template-rows: auto 1fr auto}
+      .map-wrap{height:50vh}
       .cards{grid-template-columns: 1fr}
       .toolbar{flex-direction:column; align-items:stretch}
       .toolbar > *{flex:1}
+      header .title h1{font-size:14px}
+      header .sub{font-size:11px}
+      .kpis{grid-template-columns: repeat(3,1fr)}
+      .kpi .v{font-size:16px}
+      .kpi .l{font-size:10px}
+    }
+    
+    @media (max-width:480px){
+      .map-wrap{height:45vh}
+      header{padding:8px 10px}
+      .panel{padding:8px}
+      .card{padding:8px}
+      .kpis{grid-template-columns: 1fr; gap:6px}
+      .kpi{padding:6px}
+      .toolbar button, .toolbar select, .toolbar input[type="datetime-local"]{
+        padding:6px 8px; font-size:12px
+      }
+    }
+
+    /* Layer control */
+    .layer-control {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: var(--card);
+      border: 1px solid var(--hair);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    
+    .layer-control label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    
+    .layer-control input[type="radio"] {
+      margin: 0;
     }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
@@ -79,8 +126,8 @@
       <div class="title">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/><path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         <div>
-          <h1>Chuva Agora — Zona Norte RJ</h1>
-          <div class="sub">NASA GIBS / IMERG + Previsão Open‑Meteo • GPS estilo Uber</div>
+          <h1>Previsão do Tempo Renato Stofel</h1>
+          <div class="sub">NASA GIBS / IMERG + Nuvens + Previsão Open‑Meteo • GPS estilo Uber</div>
         </div>
       </div>
       <div class="toolbar">
@@ -88,19 +135,23 @@
         <button id="btnFollow">Seguir minha posição: OFF</button>
         <span id="gpsStatus" class="small"></span>
         <button id="btnZN">Ir p/ Zona Norte RJ</button>
-        <label class="small">Imagem IMERG (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
+        <label class="small">Imagem (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
         <button id="btnNow">Agora</button>
-        <select id="opacitySel" title="Opacidade do IMERG">
-          <option value="0.6">IMERG 60%</option>
-          <option value="0.8">IMERG 80%</option>
-          <option value="1">IMERG 100%</option>
-          <option value="0.4">IMERG 40%</option>
+        <select id="opacitySel" title="Opacidade">
+          <option value="0.6">Camada 60%</option>
+          <option value="0.8">Camada 80%</option>
+          <option value="1">Camada 100%</option>
+          <option value="0.4">Camada 40%</option>
         </select>
       </div>
     </header>
 
     <div class="map-wrap">
       <div id="map"></div>
+      <div class="layer-control">
+        <label><input type="radio" name="layer" value="precipitation" checked> Chuva (IMERG)</label>
+        <label><input type="radio" name="layer" value="clouds"> Nuvens (MODIS)</label>
+      </div>
     </div>
 
     <section class="panel">
@@ -123,8 +174,8 @@
           <canvas id="chart" height="120"></canvas>
         </div>
       </div>
-      <div class="small">Camada satélite: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> — IMERG Precipitation Rate (30 min). Mapa base: © OpenStreetMap.</div>
-      <details class="small" open>
+      <div class="small">Camadas: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> — IMERG Precipitation Rate (30 min) e MODIS True Color (nuvens). Mapa base: © OpenStreetMap.</div>
+      <details class="small">
         <summary>Dev • Testes rápidos</summary>
         <ul id="testResults"></ul>
       </details>
@@ -147,10 +198,12 @@
     const btnNow = $('btnNow');
     const opacitySel = $('opacitySel');
     const alertMsg = $('alertMsg');
+    const layerControls = document.querySelectorAll('input[name="layer"]');
 
     // ===== Config =====
     const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
     let current = { lat: ZONA_NORTE.lat, lon: ZONA_NORTE.lon };
+    let currentLayerType = 'precipitation';
 
     // ===== Map (Leaflet) =====
     const map = L.map('map', { 
@@ -165,11 +218,15 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    // NASA GIBS IMERG
+    // NASA GIBS IMERG (Chuva)
     const gibsBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
     const gibsLayer = 'GPM_3IMERGHH_06_precipitationCal';
     const gibsTms = 'GoogleMapsCompatible_Level9';
     const gibsUrl = (iso) => `${gibsBase}/${gibsLayer}/default/${iso}/${gibsTms}/{z}/{y}/{x}.png`;
+
+    // NASA GIBS MODIS (Nuvens)
+    const modisLayer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+    const modisUrl = (iso) => `${gibsBase}/${modisLayer}/default/${iso}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
 
     const roundTo30UTC = (d) => { 
       const x = new Date(d); 
@@ -187,9 +244,9 @@
     };
     setTimeInput(timeNowUTC);
 
-    let imergLayer = null;
+    let currentLayer = null;
     
-    function refreshIMERG() {
+    function refreshLayer() {
       if (!timeInput.value) return;
       
       const localDate = new Date(timeInput.value);
@@ -199,40 +256,58 @@
       const isoZ = toIsoZ(roundedDate);
       
       // Remover camada anterior se existir
-      if (imergLayer) {
-        map.removeLayer(imergLayer);
+      if (currentLayer) {
+        map.removeLayer(currentLayer);
       }
       
-      // Criar nova camada
-      imergLayer = L.tileLayer(gibsUrl(isoZ), { 
+      // Criar nova camada baseada na seleção
+      let layerUrl, attribution;
+      
+      if (currentLayerType === 'precipitation') {
+        layerUrl = gibsUrl(isoZ);
+        attribution = 'NASA GIBS / IMERG (Precipitação)';
+      } else {
+        layerUrl = modisUrl(isoZ);
+        attribution = 'NASA GIBS / MODIS (Nuvens)';
+      }
+      
+      currentLayer = L.tileLayer(layerUrl, { 
         tileSize: 256, 
         opacity: parseFloat(opacitySel.value || '0.6'), 
-        attribution: 'NASA GIBS / IMERG',
+        attribution: attribution,
         minZoom: 1,
         maxZoom: 9,
         errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
       });
       
-      imergLayer.addTo(map);
+      currentLayer.addTo(map);
     }
 
-    // Inicializar a camada IMERG
-    refreshIMERG();
+    // Inicializar a camada
+    refreshLayer();
     
-    // Event listeners
+    // Event listeners para controles de camada
+    layerControls.forEach(control => {
+      control.addEventListener('change', (e) => {
+        currentLayerType = e.target.value;
+        refreshLayer();
+      });
+    });
+    
+    // Event listeners para opacidade e tempo
     opacitySel.addEventListener('change', () => {
-      if (imergLayer) {
-        imergLayer.setOpacity(parseFloat(opacitySel.value));
+      if (currentLayer) {
+        currentLayer.setOpacity(parseFloat(opacitySel.value));
       }
     });
     
     btnNow.addEventListener('click', () => { 
       timeNowUTC = roundTo30UTC(new Date()); 
       setTimeInput(timeNowUTC); 
-      refreshIMERG(); 
+      refreshLayer(); 
     });
     
-    timeInput.addEventListener('change', refreshIMERG);
+    timeInput.addEventListener('change', refreshLayer);
 
     // ===== Uber-style GPS marker =====
     const dotHTML = '<div class="uber-dot"><div class="core"></div><div class="pulse"></div></div>';
