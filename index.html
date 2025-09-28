@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Previsão do Tempo Renato Stofel (NASA GIBS + Open‑Meteo + Uber‑GPS)</title>
-  <meta name="description" content="Mapa com radar de chuva (NASA GIBS/IMERG), imagens de satélite em tempo real, previsão Open‑Meteo, alertas e GPS ao estilo Uber." />
+  <title>Previsão do Tempo Renato Stofel</title>
+  <meta name="description" content="Mapa com imagens de satélite NASA, radar de chuva e previsão Open-Meteo" />
   <meta name="theme-color" content="#0b2a4a" />
   <style>
     :root{
@@ -14,37 +14,58 @@
     *{box-sizing:border-box}
     html,body{height:100%;margin:0}
     body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans';
-         color:var(--ink); background:var(--bg)}
+         color:var(--ink); background:var(--bg); transition: background 1.5s ease}
+    
+    /* Backgrounds dinâmicos baseados no tempo */
+    body.sunny{background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)}
+    body.cloudy{background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%)}
+    body.rainy{background: linear-gradient(135deg, #1a2980 0%, #26d0ce 100%)}
+    body.night{background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)}
+    
     .app{display:grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; min-height:100vh}
-    header{padding:10px 12px; background:var(--head); border-bottom:1px solid var(--hair); display:flex; flex-wrap: wrap; gap:10px; align-items:center; justify-content:space-between}
-    header .title{display:flex; gap:10px; align-items:center}
-    header h1{font-size:16px; margin:0; font-weight:700}
-    header .sub{font-size:12px; color:var(--muted)}
-    .map-wrap{position:relative; height:60vh}
+    
+    header{padding:12px 15px; background:rgba(17, 24, 39, 0.85); border-bottom:1px solid var(--hair); 
+           display:flex; flex-wrap: wrap; gap:10px; align-items:center; justify-content:space-between;
+           backdrop-filter: blur(10px);}
+    header .title{display:flex; gap:12px; align-items:center}
+    header h1{font-size:18px; margin:0; font-weight:700}
+    header .sub{font-size:13px; color:var(--muted)}
+    
+    .map-wrap{position:relative; height:65vh}
     #map{position:absolute; inset:0}
-    .panel{display:grid; gap:10px; padding:10px; background:linear-gradient(180deg, #0f172a, #0b1220)}
-    .cards{display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:10px}
+    
+    .panel{display:grid; gap:12px; padding:12px; background:rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px);}
+    .cards{display:grid; grid-template-columns: 1fr; gap:12px}
+    
     @media (min-width:980px){
       .app{grid-template-columns: 1.3fr 1fr; grid-template-rows: auto 1fr}
       .map-wrap{grid-column:1/2; grid-row:2/3; height:auto}
-      .panel{grid-column:2/3; grid-row:2/3; overflow:auto; max-height: calc(100vh - 64px)}
+      .panel{grid-column:2/3; grid-row:2/3; overflow:auto; max-height: calc(100vh - 80px)}
       header{grid-column:1/-1}
+      .cards{grid-template-columns: repeat(2, minmax(0,1fr))}
     }
-    .card{background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:10px}
-    .card h3{margin:0 0 6px 0; font-size:14px}
-    .kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:8px}
-    .kpi{background:#0b1328; border:1px solid var(--hair); border-radius:12px; padding:8px}
-    .kpi .v{font-size:18px; font-weight:700}
-    .kpi .l{font-size:11px; color:var(--muted)}
-    .toolbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+    
+    .card{background:rgba(15, 23, 42, 0.7); border:1px solid var(--hair); border-radius:14px; padding:12px; backdrop-filter: blur(5px);}
+    .card h3{margin:0 0 8px 0; font-size:15px; color:var(--accent)}
+    
+    .kpis{display:grid; grid-template-columns: repeat(3,1fr); gap:10px}
+    .kpi{background:rgba(11, 19, 40, 0.7); border:1px solid var(--hair); border-radius:12px; padding:10px; text-align:center}
+    .kpi .v{font-size:20px; font-weight:700; margin-bottom:4px}
+    .kpi .l{font-size:12px; color:var(--muted)}
+    
+    .toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
     button, select, input[type="datetime-local"]{
-      background:#0b1328; color:var(--ink); border:1px solid var(--hair); border-radius:10px; padding:8px 10px; font-size:13px
+      background:rgba(11, 19, 40, 0.7); color:var(--ink); border:1px solid var(--hair); border-radius:10px; padding:8px 12px; font-size:14px; cursor:pointer
     }
-    button:hover{outline:1px solid var(--accent)}
+    button:hover, select:hover{outline:1px solid var(--accent); background:rgba(15, 26, 51, 0.8)}
+    
     .small{font-size:12px; color:var(--muted)}
-    footer{padding:8px 12px; border-top:1px solid var(--hair); background:#0b1220; font-size:12px; color:var(--muted)}
-    a{color:var(--accent)}
-    button.on{outline:1px solid var(--accent); border-color: var(--accent)}
+    footer{padding:10px 15px; border-top:1px solid var(--hair); background:rgba(11, 18, 32, 0.85); 
+           font-size:12px; color:var(--muted); text-align:center; backdrop-filter: blur(10px);}
+    a{color:var(--accent); text-decoration:none}
+    a:hover{text-decoration:underline}
+    
+    button.on{outline:1px solid var(--accent); border-color: var(--accent); background:rgba(15, 26, 51, 0.8)}
     #gpsStatus{margin-left:6px}
 
     /* === Uber-like blue dot (pulsing) === */
@@ -54,39 +75,14 @@
     @keyframes pulse{ 0%{transform:scale(0.6); opacity:0.6} 70%{transform:scale(1.6); opacity:0} 100%{transform:scale(1.8); opacity:0} }
 
     /* Alert styles */
-    .alert{padding:6px 8px; border-radius:6px; font-size:13px; transition:all 0.3s ease}
-    .alert.ok{background:rgba(22, 163, 74, 0.2); border-left:3px solid var(--ok)}
-    .alert.bad{background:rgba(239, 68, 68, 0.2); border-left:3px solid var(--bad)}
+    .alert{padding:8px 10px; border-radius:8px; font-size:14px; transition:all 0.3s ease; margin-top:8px}
+    .alert.ok{background:rgba(22, 163, 74, 0.2); border-left:4px solid var(--ok)}
+    .alert.bad{background:rgba(239, 68, 68, 0.2); border-left:4px solid var(--bad)}
+    .alert.warn{background:rgba(245, 158, 11, 0.2); border-left:4px solid var(--warn)}
     
     /* Loading indicator */
     .loading{display:inline-block; width:16px; height:16px; border:2px solid transparent; border-top:2px solid var(--accent); border-radius:50%; animation:spin 1s linear infinite}
     @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-
-    /* Responsive improvements for mobile */
-    @media (max-width:768px){
-      .app{grid-template-rows: auto 1fr auto}
-      .map-wrap{height:50vh}
-      .cards{grid-template-columns: 1fr}
-      .toolbar{flex-direction:column; align-items:stretch}
-      .toolbar > *{flex:1}
-      header .title h1{font-size:14px}
-      header .sub{font-size:11px}
-      .kpis{grid-template-columns: repeat(3,1fr)}
-      .kpi .v{font-size:16px}
-      .kpi .l{font-size:10px}
-    }
-    
-    @media (max-width:480px){
-      .map-wrap{height:45vh}
-      header{padding:8px 10px}
-      .panel{padding:8px}
-      .card{padding:8px}
-      .kpis{grid-template-columns: 1fr; gap:6px}
-      .kpi{padding:6px}
-      .toolbar button, .toolbar select, .toolbar input[type="datetime-local"]{
-        padding:6px 8px; font-size:12px
-      }
-    }
 
     /* Layer control */
     .layer-control {
@@ -94,54 +90,140 @@
       top: 10px;
       right: 10px;
       z-index: 1000;
-      background: var(--card);
+      background: rgba(15, 23, 42, 0.85);
       border: 1px solid var(--hair);
       border-radius: 10px;
-      padding: 8px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      backdrop-filter: blur(5px);
     }
     
     .layer-control label {
       display: flex;
       align-items: center;
-      gap: 5px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 13px;
       cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    
+    .layer-control label:hover {
+      background: rgba(255,255,255,0.05);
     }
     
     .layer-control input[type="radio"] {
       margin: 0;
+    }
+    
+    /* Current conditions */
+    .current-conditions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .temp {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .condition {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    /* Humidity indicator */
+    .humidity {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .humidity-bar {
+      flex-grow: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    
+    .humidity-fill {
+      height: 100%;
+      background: #38bdf8;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+    
+    /* Responsive improvements for mobile */
+    @media (max-width:768px){
+      .app{grid-template-rows: auto 1fr auto}
+      .map-wrap{height:55vh}
+      .cards{grid-template-columns: 1fr}
+      .toolbar{flex-direction:column; align-items:stretch}
+      .toolbar > *{flex:1}
+      header .title h1{font-size:16px}
+      header .sub{font-size:12px}
+      .kpis{grid-template-columns: repeat(3,1fr)}
+      .kpi .v{font-size:18px}
+      .kpi .l{font-size:11px}
+      .layer-control {
+        top: 5px;
+        right: 5px;
+        padding: 8px;
+      }
+    }
+    
+    @media (max-width:480px){
+      .map-wrap{height:50vh}
+      header{padding:10px 12px}
+      .panel{padding:10px}
+      .card{padding:10px}
+      .kpis{grid-template-columns: 1fr; gap:8px}
+      .kpi{padding:8px}
+      .toolbar button, .toolbar select, .toolbar input[type="datetime-local"]{
+        padding:8px 10px; font-size:13px
+      }
+      .temp { font-size: 20px; }
     }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
-<body>
+<body class="cloudy">
   <div class="app">
     <header>
       <div class="title">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/><path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2a7 7 0 00-7 7v1.126A4 4 0 004 14a4 4 0 004 4h8a4 4 0 002-7.53V9a7 7 0 00-6-6.93z" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M7 18l-1.2 2M11 18l-1.2 2M15 18l-1.2 2M19 18l-1.2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
         <div>
           <h1>Previsão do Tempo Renato Stofel</h1>
-          <div class="sub">Imagens de satélite em tempo real + Radar de chuva NASA + Previsão Open‑Meteo</div>
+          <div class="sub">Imagens de satélite NASA • Radar de chuva • Previsão Open-Meteo</div>
         </div>
       </div>
       <div class="toolbar">
-        <button id="btnHere">Minha localização (1x)</button>
-        <button id="btnFollow">Seguir minha posição: OFF</button>
+        <button id="btnHere">📍 Minha localização</button>
+        <button id="btnFollow">📡 Seguir GPS: OFF</button>
         <span id="gpsStatus" class="small"></span>
-        <button id="btnZN">Ir p/ Zona Norte RJ</button>
-        <label class="small">Imagem (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
-        <button id="btnNow">Agora</button>
+        <button id="btnZN">🗺️ Zona Norte RJ</button>
+        <label class="small">Data/hora (UTC): <input id="timeIso" type="datetime-local" step="1800"></label>
+        <button id="btnNow">🔄 Agora</button>
         <select id="opacitySel" title="Opacidade">
-          <option value="0.6">Camada 60%</option>
-          <option value="0.8">Camada 80%</option>
-          <option value="1">Camada 100%</option>
-          <option value="0.4">Camada 40%</option>
+          <option value="0.7">Opacidade 70%</option>
+          <option value="0.9">Opacidade 90%</option>
+          <option value="1">Opacidade 100%</option>
+          <option value="0.5">Opacidade 50%</option>
         </select>
       </div>
     </header>
@@ -149,41 +231,51 @@
     <div class="map-wrap">
       <div id="map"></div>
       <div class="layer-control">
-        <label><input type="radio" name="layer" value="satellite" checked> Satélite (Nuvens reais)</label>
-        <label><input type="radio" name="layer" value="precipitation"> Chuva (IMERG)</label>
-        <label><input type="radio" name="layer" value="street"> Mapa de ruas</label>
+        <label><input type="radio" name="layer" value="satellite" checked> 🌤️ Satélite (Nuvens NASA)</label>
+        <label><input type="radio" name="layer" value="precipitation"> 🌧️ Radar de Chuva</label>
       </div>
     </div>
 
     <section class="panel">
       <div class="cards">
-        <div class="card" id="alertBox">
-          <h3>Alerta rápido (próx. 3h)</h3>
-          <div class="alert" id="alertMsg">Carregando...</div>
-        </div>
         <div class="card">
-          <h3>Parâmetros de chuva (agora)</h3>
-          <div class="kpis">
-            <div class="kpi"><div class="v" id="kProb">–%</div><div class="l">Prob. de chuva</div></div>
-            <div class="kpi"><div class="v" id="kRain">– mm</div><div class="l">Chuva (1h)</div></div>
-            <div class="kpi"><div class="v" id="kSum">– mm</div><div class="l">Acumulado hoje</div></div>
+          <h3>🌡️ Condições Atuais</h3>
+          <div class="current-conditions">
+            <div class="temp" id="currentTemp">--°C</div>
+            <div class="condition" id="currentCondition">Carregando...</div>
           </div>
-          <div class="small" style="margin-top:6px">Fonte: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open‑Meteo</a></div>
+          <div class="humidity">
+            <span>Umidade:</span>
+            <div class="humidity-bar">
+              <div class="humidity-fill" id="humidityBar" style="width: 0%"></div>
+            </div>
+            <span id="humidityValue">--%</span>
+          </div>
+          <div class="kpis">
+            <div class="kpi"><div class="v" id="kProb">--%</div><div class="l">Prob. de chuva</div></div>
+            <div class="kpi"><div class="v" id="kRain">-- mm</div><div class="l">Chuva (1h)</div></div>
+            <div class="kpi"><div class="v" id="kSum">-- mm</div><div class="l">Acumulado hoje</div></div>
+          </div>
         </div>
+        
+        <div class="card" id="alertBox">
+          <h3>⚠️ Alerta Rápido (próximas 3h)</h3>
+          <div class="alert" id="alertMsg">Carregando condições meteorológicas...</div>
+        </div>
+        
         <div class="card" style="grid-column:1/-1">
-          <h3>Próximas 48h — chuva (mm) e probabilidade (%)</h3>
-          <canvas id="chart" height="120"></canvas>
+          <h3>📊 Previsão para as Próximas 48h</h3>
+          <canvas id="chart" height="140"></canvas>
         </div>
       </div>
-      <div class="small">Imagens de satélite: <a href="https://openweathermap.org/api" target="_blank" rel="noopener">OpenWeatherMap</a> • Radar de chuva: <a href="https://gibs.earthdata.nasa.gov/" target="_blank" rel="noopener">NASA GIBS</a> • Mapa base: © OpenStreetMap.</div>
-      <details class="small">
-        <summary>Informações técnicas</summary>
-        <ul id="testResults"></ul>
-      </details>
+      
+      <div class="small" style="margin-top:10px; text-align:center">
+        Dados de satélite: NASA GIBS • Previsão: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Mapa base: © OpenStreetMap
+      </div>
     </section>
 
     <footer>
-      Dica: use a camada de satélite para ver as nuvens reais em tempo real e a camada de chuva para identificar áreas de precipitação.
+      Atualizado automaticamente • Use o modo "Seguir GPS" para acompanhar sua localização em tempo real
     </footer>
   </div>
 
@@ -200,6 +292,10 @@
     const opacitySel = $('opacitySel');
     const alertMsg = $('alertMsg');
     const layerControls = document.querySelectorAll('input[name="layer"]');
+    const currentTemp = $('currentTemp');
+    const currentCondition = $('currentCondition');
+    const humidityValue = $('humidityValue');
+    const humidityBar = $('humidityBar');
 
     // ===== Config =====
     const ZONA_NORTE = { lat: -22.86, lon: -43.28, zoom: 12 };
@@ -219,15 +315,21 @@
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
     
-    // Adicionar camada de satélite (OpenWeatherMap)
-    const satelliteLayer = L.tileLayer('https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=1b72d7b1c9a7c4c8c8c8c8c8c8c8c8c8', {
-      maxZoom: 19,
-      attribution: 'Satellite imagery &copy; <a href="https://openweathermap.org/">OpenWeatherMap</a>',
-      opacity: 0.7
+    // Camada de satélite da NASA GIBS (MODIS True Color)
+    const nasaBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
+    const nasaLayer = 'MODIS_Terra_CorrectedReflectance_TrueColor';
+    const nasaTime = new Date().toISOString().split('T')[0]; // Data atual
+    const nasaUrl = `${nasaBase}/${nasaLayer}/default/${nasaTime}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+    
+    const satelliteLayer = L.tileLayer(nasaUrl, {
+      maxZoom: 9,
+      attribution: 'Imagery &copy; NASA EOSDIS',
+      opacity: 0.8,
+      errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
     });
     
     // Adicionar camada base por padrão
-    osmLayer.addTo(map);
+    satelliteLayer.addTo(map);
 
     // NASA GIBS IMERG (Chuva)
     const gibsBase = 'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best';
@@ -263,10 +365,7 @@
       if (currentLayerType === 'satellite') {
         map.removeLayer(osmLayer);
         satelliteLayer.addTo(map);
-        satelliteLayer.setOpacity(parseFloat(opacitySel.value || '0.7'));
-      } else if (currentLayerType === 'street') {
-        map.removeLayer(satelliteLayer);
-        osmLayer.addTo(map);
+        satelliteLayer.setOpacity(parseFloat(opacitySel.value || '0.8'));
       } else if (currentLayerType === 'precipitation') {
         map.removeLayer(satelliteLayer);
         osmLayer.addTo(map);
@@ -283,7 +382,7 @@
         // Criar nova camada
         currentOverlayLayer = L.tileLayer(gibsUrl(isoZ), { 
           tileSize: 256, 
-          opacity: parseFloat(opacitySel.value || '0.6'), 
+          opacity: parseFloat(opacitySel.value || '0.7'), 
           attribution: 'NASA GIBS / IMERG (Precipitação)',
           minZoom: 1,
           maxZoom: 9,
@@ -370,20 +469,56 @@
       }
     }
 
+    // ===== Função para atualizar o fundo baseado nas condições =====
+    function updateBackground(weatherCode, isDay) {
+      const body = document.body;
+      body.className = ''; // Remove todas as classes anteriores
+      
+      // Determinar se é noite (com base na hora local)
+      const now = new Date();
+      const hour = now.getHours();
+      const isNight = hour < 6 || hour > 18;
+      
+      // Se for noite, usar tema noturno independente do tempo
+      if (isNight) {
+        body.classList.add('night');
+        return;
+      }
+      
+      // Caso contrário, usar tema baseado no código do tempo
+      if (weatherCode === 0 || weatherCode === 1) {
+        // Céu limpo ou principalmente limpo
+        body.classList.add('sunny');
+      } else if (weatherCode >= 2 && weatherCode <= 3) {
+        // Parcialmente nublado ou nublado
+        body.classList.add('cloudy');
+      } else if (weatherCode >= 51 || weatherCode === 45 || weatherCode === 48) {
+        // Chuvisco ou nevoeiro
+        body.classList.add('cloudy');
+      } else if (weatherCode >= 61 || weatherCode >= 80) {
+        // Chuva ou pancadas de chuva
+        body.classList.add('rainy');
+      } else {
+        // Padrão (nublado)
+        body.classList.add('cloudy');
+      }
+    }
+
     // ===== Forecast (Open‑Meteo) =====
     let chart = null;
     
     async function loadForecast() {
       try {
-        alertMsg.textContent = 'Carregando...';
-        alertMsg.classList.remove('ok', 'bad');
+        alertMsg.textContent = 'Carregando dados meteorológicos...';
+        alertMsg.classList.remove('ok', 'bad', 'warn');
+        currentCondition.textContent = 'Carregando...';
         
         const url = new URL('https://api.open-meteo.com/v1/forecast');
         url.search = new URLSearchParams({ 
           latitude: current.lat, 
           longitude: current.lon, 
-          hourly: 'precipitation,precipitation_probability,rain,showers', 
-          daily: 'precipitation_sum,precipitation_hours', 
+          hourly: 'temperature_2m,relativehumidity_2m,precipitation,precipitation_probability,rain,showers,weathercode', 
+          daily: 'temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_hours,weathercode', 
           timezone: 'America/Sao_Paulo',
           forecast_days: 3
         }).toString();
@@ -409,13 +544,26 @@
           }
         }
         
+        // Atualizar condições atuais
+        const temp = H.temperature_2m?.[nowIdx] ?? 0;
+        const humidity = H.relativehumidity_2m?.[nowIdx] ?? 0;
+        const weatherCode = H.weathercode?.[nowIdx] ?? 0;
+        
+        currentTemp.textContent = `${Math.round(temp)}°C`;
+        currentCondition.textContent = getWeatherDescription(weatherCode);
+        humidityValue.textContent = `${Math.round(humidity)}%`;
+        humidityBar.style.width = `${humidity}%`;
+        
+        // Atualizar o fundo baseado nas condições
+        updateBackground(weatherCode, true);
+        
         const prob = H.precipitation_probability?.[nowIdx] ?? 0;
         const rain = (H.rain?.[nowIdx] ?? 0) + (H.showers?.[nowIdx] ?? 0);
         const todaySum = data.daily?.precipitation_sum?.[0] ?? null;
         
         $('kProb').textContent = prob + '%';
         $('kRain').textContent = rain.toFixed(1) + ' mm';
-        $('kSum').textContent = (todaySum != null ? todaySum.toFixed(1) : '–') + ' mm';
+        $('kSum').textContent = (todaySum != null ? todaySum.toFixed(1) : '--') + ' mm';
         
         // Calcular alerta para próximas 3 horas
         let maxProb = 0, sumRain = 0;
@@ -425,19 +573,24 @@
         }
         
         let alertText = '';
+        let alertClass = 'ok';
+        
         if (maxProb >= 80 && sumRain >= 10) {
-          alertMsg.classList.add('bad');
+          alertClass = 'bad';
           alertText = `Chuva forte provável nas próximas 3h (prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm).`;
         } else if (maxProb >= 60 && sumRain >= 3) {
+          alertClass = 'warn';
           alertText = `Chuva moderada possível nas próximas 3h (prob. ${maxProb}%, ~${sumRain.toFixed(1)} mm).`;
         } else if (maxProb >= 30) {
-          alertMsg.classList.add('ok');
+          alertClass = 'ok';
           alertText = `Possibilidade de chuva fraca (prob. ${maxProb}%).`;
         } else {
-          alertMsg.classList.add('ok');
+          alertClass = 'ok';
           alertText = 'Sem sinal relevante de chuva nas próximas horas.';
         }
+        
         alertMsg.textContent = alertText;
+        alertMsg.className = 'alert ' + alertClass;
         
         // Gráfico para próximas 48 horas
         const endIdx = Math.min(nowIdx + 48, H.time.length);
@@ -515,13 +668,56 @@
         
       } catch (e) {
         console.warn('Forecast error', e);
-        alertMsg.textContent = 'Erro ao carregar previsão';
-        alertMsg.classList.remove('ok', 'bad');
+        alertMsg.textContent = 'Erro ao carregar previsão. Tentando novamente em 30 segundos.';
+        alertMsg.classList.remove('ok', 'bad', 'warn');
         
-        $('kProb').textContent = '–%';
-        $('kRain').textContent = '– mm';
-        $('kSum').textContent = '– mm';
+        $('kProb').textContent = '--%';
+        $('kRain').textContent = '-- mm';
+        $('kSum').textContent = '-- mm';
+        currentTemp.textContent = '--°C';
+        currentCondition.textContent = 'Dados indisponíveis';
+        humidityValue.textContent = '--%';
+        humidityBar.style.width = '0%';
+        
+        // Tentar novamente após 30 segundos
+        setTimeout(loadForecast, 30000);
       }
+    }
+    
+    // Função para obter descrição do tempo baseada no código meteorológico
+    function getWeatherDescription(code) {
+      const weatherCodes = {
+        0: 'Céu limpo',
+        1: 'Principalmente limpo',
+        2: 'Parcialmente nublado',
+        3: 'Nublado',
+        45: 'Nevoeiro',
+        48: 'Nevoeiro com geada',
+        51: 'Chuvisco leve',
+        53: 'Chuvisco moderado',
+        55: 'Chuvisco denso',
+        56: 'Chuvisco congelante leve',
+        57: 'Chuvisco congelante denso',
+        61: 'Chuva leve',
+        63: 'Chuva moderada',
+        65: 'Chuva forte',
+        66: 'Chuva congelante leve',
+        67: 'Chuva congelante forte',
+        71: 'Queda de neve leve',
+        73: 'Queda de neve moderada',
+        75: 'Queda de neve forte',
+        77: 'Grãos de neve',
+        80: 'Pancadas de chuva leves',
+        81: 'Pancadas de chuva moderadas',
+        82: 'Pancadas de chuva violentas',
+        85: 'Pancadas de neve leves',
+        86: 'Pancadas de neve fortes',
+        95: 'Trovoada',
+        96: 'Trovoada com granizo leve',
+        99: 'Trovoada com granizo forte'
+      };
+      
+      return weatherCodes[code] || 'Condições desconhecidas';
     }
 
     // ===== Controls =====
@@ -565,7 +761,7 @@
       if (watchId !== null) return;
       
       following = true;
-      btnFollow.textContent = 'Seguir minha posição: ON';
+      btnFollow.textContent = '📡 Seguir GPS: ON';
       btnFollow.classList.add('on');
       gpsStatus.textContent = 'Ativo';
       
@@ -592,7 +788,7 @@
     
     function stopFollow() {
       following = false;
-      btnFollow.textContent = 'Seguir minha posição: OFF';
+      btnFollow.textContent = '📡 Seguir GPS: OFF';
       btnFollow.classList.remove('on');
       gpsStatus.textContent = '';
       
@@ -608,6 +804,9 @@
 
     // Inicializar previsão
     loadForecast();
+    
+    // Atualizar previsão a cada 10 minutos
+    setInterval(loadForecast, 600000);
 
     // Desabilitar controles de tempo quando não na camada de precipitação
     timeInput.disabled = true;
